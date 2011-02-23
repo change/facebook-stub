@@ -1,0 +1,3 @@
+#!
+cat src/facebook.js src/cookie.js src/md5.js > facebook-stub.js
+git add facebook-stub.js
