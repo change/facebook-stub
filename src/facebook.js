@@ -94,7 +94,7 @@
     FBWorld.state('connected', false);
   }
 
-  function addToFriends(id, name){
+  function addFriend(id, name){
     FBWorld.friendList.push({id: id, name: name});
   }
 
@@ -130,7 +130,7 @@
     denyConnection                   : denyConnection,
 
     //friends
-    addToFriends                     : addToFriends,
+    addFriend                     : addFriend,
     friendList                       : []
   };
 
