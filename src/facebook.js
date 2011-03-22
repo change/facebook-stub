@@ -95,7 +95,13 @@
   }
 
   function addFriend(id, name){
-    FBWorld.friendList.push({id: id, name: name});
+    var friends = FBWorld.friendList();
+    friends.push({id: id, name: name});
+    FBWorld.Helpers.makeMeACookie('fb_friends', JSON.stringify(friends));
+  }
+
+  function friendList(){
+    return JSON.parse(FBWorld.Helpers.makeMeACookie('fb_friends') || '[]');
   }
 
   FB = { // Emulates the FB API
@@ -130,8 +136,8 @@
     denyConnection                   : denyConnection,
 
     //friends
-    addFriend                     : addFriend,
-    friendList                       : []
+    addFriend                        : addFriend,
+    friendList                       : friendList
   };
 
   // PRIVATE FUNCTIONS

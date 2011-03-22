@@ -2,7 +2,8 @@
   <head>
     <script src="../facebook-stub.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
-      FB.init({appId: 12345})
+      FB.init({appId: 12345});
+      FBWorld.setSecret('awesome');
       FBWorld.loggedIn();
       FBWorld.connected();
     </script>
