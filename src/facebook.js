@@ -44,7 +44,7 @@
       callback(undefined);
     }
     if(location == '/me/friends'){
-      callback(FBWorld.friendList);
+      callback(FBWorld.friendList());
     }
   }
 
