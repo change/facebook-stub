@@ -38,6 +38,16 @@
     return getStatus().session;
   }
 
+  function api(location, callback){
+
+    if(!FBWorld.state('connected')){
+      callback(undefined);
+    }
+    if(location == '/me/friends'){
+      callback(FBWorld.friendList);
+    }
+  }
+
   // FBWorld Functions
   //3 states: loggedOut, loggedIn, connected
   function state(){
@@ -84,12 +94,17 @@
     FBWorld.state('connected', false);
   }
 
+  function addToFriends(id, name){
+    FBWorld.friendList.push({id: id, name: name});
+  }
+
   FB = { // Emulates the FB API
     getLoginStatus : getLoginStatus,
     logout         : logout,
     login          : login,
     init           : init,
-    getSession     : getSession
+    getSession     : getSession,
+    api            : api
   };
 
   FBWorld = { // used to set the state of Facebook
@@ -105,13 +120,18 @@
     initialized                      : false,
     beingPromptedToLogIn             : false,
     beingPromptedToLogInCallback     : undefined,
+    // this will come later, no need for it now
     // successfullyLogin: successfullyLogin,
     // failToLogin: failToLogin,
 
     beingPromptedToConnect           : false,
     beingPromptedToConnectInCallback : undefined,
     allowConnection                  : allowConnection,
-    denyConnection                   : denyConnection
+    denyConnection                   : denyConnection,
+
+    //friends
+    addToFriends                     : addToFriends,
+    friendList                       : []
   };
 
   // PRIVATE FUNCTIONS
