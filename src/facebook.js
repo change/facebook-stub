@@ -104,13 +104,20 @@
     return JSON.parse(FBWorld.Helpers.makeMeACookie('fb_friends') || '[]');
   }
 
+  var XFBML = {
+    parse: function(element, callback){
+      callback();
+    }
+  };
+
   FB = { // Emulates the FB API
     getLoginStatus : getLoginStatus,
     logout         : logout,
     login          : login,
     init           : init,
     getSession     : getSession,
-    api            : api
+    api            : api,
+    XFBML          : XFBML
   };
 
   FBWorld = { // used to set the state of Facebook
