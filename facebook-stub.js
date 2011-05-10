@@ -39,11 +39,9 @@
   }
 
   function api(location, callback){
-
     if(!FBWorld.state('connected')){
       callback(undefined);
-    }
-    if(location == '/me/friends'){
+    }else if(location == '/me/friends'){
       callback({data:FBWorld.friendList()});
     }
   }
