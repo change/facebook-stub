@@ -9,17 +9,17 @@
     state('appId', data.appId);
   }
 
-  function login(callback){
+  function login(callback, options){
     if (calledBeforeInit('login')) return;
     if (FBWorld.state('loggedIn')){
       console.log('FB.login() called when user is already connected.');
       if (FBWorld.state('connected')){
-        callback(getStatus());
+        callback(getStatus('standard'));
       }else{
-        simulatePromptToConnect(callback);
+        simulatePromptToConnect(callback, options);
       }
     }else{
-      simulatePromptToLogin(callback);
+      simulatePromptToLogin(callback, options);
     }
   }
 
@@ -32,7 +32,7 @@
 
   function getLoginStatus(callback, perms){
     if (calledBeforeInit('getLoginStatus')) return;
-    callback(getStatus(perms));
+    callback(getStatus(perms ? 'extended' : false));
   }
 
   function getSession(){
@@ -160,7 +160,7 @@
 
   // PRIVATE FUNCTIONS
 
-  function getStatus(includePerms) {
+  function getStatus(permissions) {
     var theState = FBWorld.state();
 
     // Connected
@@ -170,7 +170,9 @@
         session: createConnectedCookie()
       };
 
-      if (includePerms) status.perms = JSON.stringify(theState.perms);
+      if(typeof(permissions) != 'undefined') {
+        status.perms = permissions == 'extended' ? JSON.stringify(theState.perms) : theState.perms.standard;
+      }
       return status;
     }
 
@@ -200,7 +202,7 @@
     return true;
   }
 
-  function simulatePromptToLogin(callback) {
+  function simulatePromptToLogin(callback, options) {
     // simulate being prompted to log in
     FBWorld.beingPromptedToLogIn = true;
     FBWorld.beingPromptedToLogInCallback = function(approved){
@@ -209,9 +211,10 @@
       if(approved){
         FBWorld.loggedIn();
         if (!FBWorld.state('connected')){
-          simulatePromptToConnect(callback);
+          simulatePromptToConnect(callback, options);
         }else{
-          callback(getStatus());
+          FBWorld.state('perms', 'standard', options.perms);
+          callback(getStatus('standard'));
         }
       }else{
         FBWorld.notLoggedIn();
@@ -221,14 +224,17 @@
     };
   };
 
-  function simulatePromptToConnect(callback) {
+  function simulatePromptToConnect(callback, options) {
     // simulate being prompted to connect
     FBWorld.beingPromptedToConnect = true;
     FBWorld.beingPromptedToConnectCallback = function(approved){
       approved ? FBWorld.connected() : FBWorld.notConnected();
       FBWorld.beingPromptedToConnect = false;
       FBWorld.beingPromptedToConnectCallback = undefined;
-      callback(getStatus());
+      if (approved){
+        FBWorld.state('perms', 'standard', options.perms);
+      }
+      callback(getStatus('standard'));
     };
   };
 
