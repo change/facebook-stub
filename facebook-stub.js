@@ -292,7 +292,6 @@
 })(this);
 FBWorld.Helpers = {};
 setTimeout(function() { if (typeof fbAsyncInit === 'function') fbAsyncInit(); }, 1);
-
 /**
  * Cookie plugin
  *

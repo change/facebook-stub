@@ -1,5 +1,7 @@
 ;(function(window, undefined){
 
+  //var standardPerms = '{"extended":["status_update","photo_upload","video_upload","offline_access","email","create_note","share_item","publish_stream","contact_email"],"user":["manage_friendlists","create_event","read_requests","manage_pages"],"friends":[]}';
+
   // two globals for creating the cookie
   // FB Functions
   function init(data){
@@ -30,7 +32,7 @@
 
   function getLoginStatus(callback, perms){
     if (calledBeforeInit('getLoginStatus')) return;
-   callback(getStatus());
+    callback(getStatus(perms));
   }
 
   function getSession(){
@@ -39,11 +41,9 @@
   }
 
   function api(location, callback){
-
     if(!FBWorld.state('connected')){
       callback(undefined);
-    }
-    if(location == '/me/friends'){
+    }else if(location == '/me/friends'){
       callback({data:FBWorld.friendList()});
     }
   }
@@ -59,6 +59,12 @@
       FBWorld.Helpers.makeMeACookie('fb-stub', JSON.stringify(theState));
       return arguments[1];
     }
+    if (arguments.length === 3) {
+      if(typeof(theState[arguments[0]]) == 'undefined') theState[arguments[0]] = {};
+      theState[arguments[0]][arguments[1]] = arguments[2];
+      FBWorld.Helpers.makeMeACookie('fb-stub', JSON.stringify(theState));
+      return arguments[2];
+    }
   }
 
   function uid(){
@@ -67,6 +73,10 @@
 
   function setUid(newUid){
     return FBWorld.state('uid', newUid);
+  }
+
+  function setExtendedPermissions(newPermissions){
+    return FBWorld.state('perms', 'extended', newPermissions);
   }
 
   function setSecret(newSecret){
@@ -121,14 +131,15 @@
   };
 
   FBWorld = { // used to set the state of Facebook
-    state        : state,
-    loggedIn     : loggedIn,
-    notLoggedIn  : notLoggedIn,
-    setUid       : setUid,
-    setSecret    : setSecret,
-    uid          : uid,
-    connected    : connected,
-    notConnected : notConnected,
+    state                   : state,
+    loggedIn                : loggedIn,
+    notLoggedIn             : notLoggedIn,
+    setUid                  : setUid,
+    setSecret               : setSecret,
+    uid                     : uid,
+    connected               : connected,
+    notConnected            : notConnected,
+    setExtendedPermissions  : setExtendedPermissions,
 
     initialized                      : false,
     beingPromptedToLogIn             : false,
@@ -180,8 +191,6 @@
         status: 'unknown'
       };
     }
-
-    // var selectedPerms = '{"extended":["status_update","photo_upload","video_upload","offline_access","email","create_note","share_item","publish_stream","contact_email"],"user":["manage_friendlists","create_event","read_requests","manage_pages"],"friends":[]}';
 
   };
 
@@ -283,4 +292,3 @@
 })(this);
 FBWorld.Helpers = {};
 setTimeout(function() { if (typeof fbAsyncInit === 'function') fbAsyncInit(); }, 1);
-
