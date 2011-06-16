@@ -56,13 +56,13 @@
     if (arguments.length === 1) return theState[arguments[0]];
     if (arguments.length === 2) {
       theState[arguments[0]] = arguments[1];
-      FBWorld.Helpers.makeMeACookie('fb-stub', JSON.stringify(theState));
+      FBWorld.Helpers.makeMeACookie('fb-stub', JSON.stringify(theState), cookieOptions);
       return arguments[1];
     }
     if (arguments.length === 3) {
       if(typeof(theState[arguments[0]]) == 'undefined') theState[arguments[0]] = {};
       theState[arguments[0]][arguments[1]] = arguments[2];
-      FBWorld.Helpers.makeMeACookie('fb-stub', JSON.stringify(theState));
+      FBWorld.Helpers.makeMeACookie('fb-stub', JSON.stringify(theState), cookieOptions);
       return arguments[2];
     }
   }
@@ -362,7 +362,7 @@ FBWorld.Helpers.makeMeACookie = function(name, value, options) {
           value = '';
           options.expires = -1;
         } else {
-          options.expires = null;
+          options.expires = 100; // 100 days from now
         }
         var expires = '';
         if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {

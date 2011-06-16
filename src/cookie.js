@@ -62,7 +62,7 @@ FBWorld.Helpers.makeMeACookie = function(name, value, options) {
           value = '';
           options.expires = -1;
         } else {
-          options.expires = null;
+          options.expires = 100; // 100 days from now
         }
         var expires = '';
         if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
