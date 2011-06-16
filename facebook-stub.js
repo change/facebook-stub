@@ -359,8 +359,10 @@ FBWorld.Helpers.makeMeACookie = function(name, value, options) {
     if (typeof value != 'undefined') { // name and value given, set cookie
         options = options || {};
         if (value === null) {
-            value = '';
-            options.expires = -1;
+          value = '';
+          options.expires = -1;
+        } else {
+          options.expires = null;
         }
         var expires = '';
         if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
