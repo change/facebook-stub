@@ -167,7 +167,7 @@
     if (theState.loggedIn && theState.connected){
       var status = {
         status: "connected",
-        session: createConnectedCookie()
+        authResponse: createConnectedCookie()
       };
 
       if(typeof(permissions) != 'undefined') {
@@ -180,7 +180,7 @@
     if (theState.loggedIn && !theState.connected){
       return {
         perms: null,
-        session: null,
+        authResponse: null,
         status: 'notConnected'
       };
     }
@@ -189,7 +189,7 @@
     if (!theState.loggedIn) {
       return {
         perms: null,
-        session: null,
+        authResponse: null,
         status: 'unknown'
       };
     }
@@ -253,12 +253,10 @@
   // cookie looks like this: (with the quotes): "access_token=theToken&base_domain=local-change.org&expires=0&secret=theSecret&session_key=theSessionKeysig=theSig-Hashed&uid=theUID"
   function createConnectedCookie(){
     var defaultValues = {
-      access_token: 'theToken',
-      base_domain: window.location.hostname.replace(/^www\./, ''),
-      secret: state('secret') || 'theSecret',
-      session_key: 'sessionKey',
-      expires: 0,
-      uid: state('uid')
+      accessToken: 'theToken',
+      expiresIn: 0,
+      signedRequest: 'theSignedRequest',
+      userID: state('uid')
     };
     if (uid() != null){
       defaultValues.uid = uid();
