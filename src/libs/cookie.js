@@ -53,7 +53,7 @@
  * @cat Plugins/Cookie
  * @author Klaus Hartl/klaus.hartl@stilbuero.de
  */
- 
+
 // Modified to make it not use jquery
 FBWorld.Helpers.makeMeACookie = function(name, value, options) {
     if (typeof value != 'undefined') { // name and value given, set cookie

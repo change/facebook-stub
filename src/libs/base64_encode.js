@@ -1,4 +1,4 @@
-FBWorld.Helpers.base64_encode = function (data) {
+FBWorld.Helpers.base64_encode = function (data, utf8encode) {
     // http://kevin.vanzonneveld.net
     // +   original by: Tyler Akins (http://rumkin.com)
     // +   improved by: Bayron Guevara
@@ -25,6 +25,8 @@ FBWorld.Helpers.base64_encode = function (data) {
         return data;
     }
 
+    // Only do this if forced
+    if (utf8encode)
     data = this.utf8_encode(data + '');
 
     do { // pack three octets into four hexets
@@ -44,9 +46,9 @@ FBWorld.Helpers.base64_encode = function (data) {
     } while (i < data.length);
 
     enc = tmp_arr.join('');
-    
+
     var r = data.length % 3;
-    
+
     return (r ? enc.slice(0, r - 3) : enc) + '==='.slice(r || 3);
 
-}
+};
