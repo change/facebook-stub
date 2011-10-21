@@ -1,19 +1,19 @@
-;(function(window, undefined){
+;(function(window, undefined) {
 
   //var standardPerms = '{"extended":["status_update","photo_upload","video_upload","offline_access","email","create_note","share_item","publish_stream","contact_email"],"user":["manage_friendlists","create_event","read_requests","manage_pages"],"friends":[]}';
 
   // two globals for creating the cookie
   // FB Functions
-  function init(data){
+  function init(data) {
     FBWorld.initialized = true;
     state('appId', data.appId);
   }
 
-  function login(callback, options){
+  function login(callback, options) {
     if (calledBeforeInit('login')) return;
-    if (FBWorld.state('loggedIn')){
+    if (FBWorld.state('loggedIn')) {
       console.log('FB.login() called when user is already connected.');
-      if (FBWorld.state('connected')){
+      if (FBWorld.state('connected')) {
         callback(getStatus('standard'));
       }else{
         simulatePromptToConnect(callback, options);
@@ -23,34 +23,34 @@
     }
   }
 
-  function logout(callback){
+  function logout(callback) {
     if (calledBeforeInit('logout')) return;
     if (!FBWorld.state('loggedIn')) console.log('FB.logout() called without a session.');
     FBWorld.notLoggedIn();
     callback(getStatus());
   }
 
-  function getLoginStatus(callback, perms){
+  function getLoginStatus(callback, perms) {
     if (calledBeforeInit('getLoginStatus')) return;
     callback(getStatus(perms ? 'extended' : false));
   }
 
-  function getSession(){
+  function getSession() {
     if (calledBeforeInit('getSession')) return false;
     return getStatus().session;
   }
 
-  function api(location, callback){
-    if(!FBWorld.state('connected')){
+  function api(location, callback) {
+    if(!FBWorld.state('connected')) {
       callback(undefined);
-    }else if(location == '/me/friends'){
+    }else if(location == '/me/friends') {
       callback({data:FBWorld.friendList()});
     }
   }
 
   // FBWorld Functions
   //3 states: loggedOut, loggedIn, connected
-  function state(){
+  function state() {
     var theState = JSON.parse(FBWorld.Helpers.makeMeACookie('fb-stub') || '{}');
     if (arguments.length === 0) return theState;
     if (arguments.length === 1) return theState[arguments[0]];
@@ -67,55 +67,55 @@
     }
   }
 
-  function uid(){
+  function uid() {
     return FBWorld.state('uid');
   }
 
-  function setUid(newUid){
+  function setUid(newUid) {
     return FBWorld.state('uid', newUid);
   }
 
-  function setExtendedPermissions(newPermissions){
+  function setExtendedPermissions(newPermissions) {
     return FBWorld.state('perms', 'extended', newPermissions);
   }
 
-  function setSecret(newSecret){
+  function setSecret(newSecret) {
     return state('secret', newSecret);
   }
 
-  function loggedIn(){
+  function loggedIn() {
     createConnectedCookie();
     FBWorld.state('loggedIn', true);
     return true;
   }
 
-  function notLoggedIn(){
+  function notLoggedIn() {
     deleteConnectedCookie();
     FBWorld.state('loggedIn', false);
   }
 
-  function connected(){
+  function connected() {
     createConnectedCookie();
     FBWorld.state('connected', true);
   }
 
-  function notConnected(){
+  function notConnected() {
     deleteConnectedCookie();
     FBWorld.state('connected', false);
   }
 
-  function addFriend(id, name){
+  function addFriend(id, name) {
     var friends = FBWorld.friendList();
     friends.push({id: id, name: name});
     FBWorld.Helpers.makeMeACookie('fb_friends', JSON.stringify(friends));
   }
 
-  function friendList(){
+  function friendList() {
     return JSON.parse(FBWorld.Helpers.makeMeACookie('fb_friends') || '[]');
   }
 
   var XFBML = {
-    parse: function(element, callback){
+    parse: function(element, callback) {
       callback();
     }
   };
@@ -164,7 +164,7 @@
     var theState = FBWorld.state();
 
     // Connected
-    if (theState.loggedIn && theState.connected){
+    if (theState.loggedIn && theState.connected) {
       var status = {
         status: "connected",
         authResponse: createConnectedCookie()
@@ -177,7 +177,7 @@
     }
 
     // not connected
-    if (theState.loggedIn && !theState.connected){
+    if (theState.loggedIn && !theState.connected) {
       return {
         perms: null,
         authResponse: null,
@@ -205,12 +205,12 @@
   function simulatePromptToLogin(callback, options) {
     // simulate being prompted to log in
     FBWorld.beingPromptedToLogIn = true;
-    FBWorld.beingPromptedToLogInCallback = function(approved){
+    FBWorld.beingPromptedToLogInCallback = function(approved) {
       FBWorld.beingPromptedToLogin = false;
       FBWorld.beingPromptedToLoginCallback = undefined;
-      if(approved){
+      if(approved) {
         FBWorld.loggedIn();
-        if (!FBWorld.state('connected')){
+        if (!FBWorld.state('connected')) {
           simulatePromptToConnect(callback, options);
         }else{
           FBWorld.state('perms', 'standard', options.perms);
@@ -227,11 +227,11 @@
   function simulatePromptToConnect(callback, options) {
     // simulate being prompted to connect
     FBWorld.beingPromptedToConnect = true;
-    FBWorld.beingPromptedToConnectCallback = function(approved){
+    FBWorld.beingPromptedToConnectCallback = function(approved) {
       approved ? FBWorld.connected() : FBWorld.notConnected();
       FBWorld.beingPromptedToConnect = false;
       FBWorld.beingPromptedToConnectCallback = undefined;
-      if (approved){
+      if (approved) {
         FBWorld.state('perms', 'standard', options.perms);
       }
       callback(getStatus('standard'));
@@ -251,45 +251,40 @@
   var cookieOptions = { path: '/', domain: window.location.hostname.replace(/^www/, '')};
 
   // cookie looks like this: (with the quotes): "access_token=theToken&base_domain=local-change.org&expires=0&secret=theSecret&session_key=theSessionKeysig=theSig-Hashed&uid=theUID"
-  function createConnectedCookie(){
-    var defaultValues = {
-      accessToken: 'theToken',
-      expiresIn: 0,
-      signedRequest: 'theSignedRequest',
-      userID: state('uid')
+  function createConnectedCookie() {
+    var theState = {
+      user_id: state('uid'),
+      code: 'theAccessToken|hashData',
+      // We need to verify the timezone for this value. Traditionally FB uses PST8PDT, but it may be UTC.
+      issued_at: Math.floor(new Date().getTime() / 1000)
     };
-    if (uid() != null){
-      defaultValues.uid = uid();
+
+    if (uid() != null) {
+      theState.uid = uid();
     }
-    var theState = addSig(defaultValues);
-    FBWorld.Helpers.makeMeACookie('fbs_'+state('appId'), cookieToString(theState), cookieOptions);
+
+    FBWorld.Helpers.makeMeACookie('fbsr_'+state('appId'), cookieToString(theState, state('secret')), cookieOptions);
     return theState;
   }
 
-  function addSig(theState){
-    theState['sig'] = FBWorld.Helpers.md5.hex_md5(cookieToString(theState, true));
-    return theState;
+  function cookieToString(theState, secret) {
+    // Set the algorithm here, to keep any changes here.
+    theState.algorithm = 'HMAC-SHA256';
+
+    var payload        = JSON.stringify(theState),
+        encodedPayload = FBWorld.Helpers.base64_encode(payload),
+        shaObj         = new FBWorld.Helpers.jsSHA(encodedPayload, "ASCII"),
+        b64Signature   = shaObj.getHMAC(secret, "ASCII", "SHA-256", "B64");
+
+    // jsSHA uses an odd Base64 encoder, which uses + where FB has -. For now we'll just replace them,
+    // but if we find other inconsistencies, we should use the HEX value and encode it ourselves.
+    b64Signature.replace('+', '-');
+
+    return b64Signature + '.' + encodedPayload;
   }
 
-  function cookieToString(theState, forSig){
-    var response = [], fields;
-    if (typeof forSig == 'undefined')
-      fields = ['access_token', 'base_domain', 'expires', 'secret', 'session_key', 'sig', 'uid'];
-    else
-      fields = ['access_token', 'base_domain', 'expires', 'secret', 'session_key', 'uid'];
-    for (var i =0; i < fields.length; i++){
-      var field = fields[i];
-      response.push(field + '=' + theState[field]);
-    }
-    if (typeof forSig != 'undefined'){
-      response = response.join('') + theState['secret'];
-    }else{
-      response = response.join('&');
-    }
-    return response;
-  }
-  function deleteConnectedCookie(){
-    FBWorld.Helpers.makeMeACookie('fbs_'+state('appId'), null, cookieOptions);
+  function deleteConnectedCookie() {
+    FBWorld.Helpers.makeMeACookie('fbsr_'+state('appId'), null, cookieOptions);
   }
 
 

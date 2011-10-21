@@ -1,19 +1,19 @@
-;(function(window, undefined){
+;(function(window, undefined) {
 
   //var standardPerms = '{"extended":["status_update","photo_upload","video_upload","offline_access","email","create_note","share_item","publish_stream","contact_email"],"user":["manage_friendlists","create_event","read_requests","manage_pages"],"friends":[]}';
 
   // two globals for creating the cookie
   // FB Functions
-  function init(data){
+  function init(data) {
     FBWorld.initialized = true;
     state('appId', data.appId);
   }
 
-  function login(callback, options){
+  function login(callback, options) {
     if (calledBeforeInit('login')) return;
-    if (FBWorld.state('loggedIn')){
+    if (FBWorld.state('loggedIn')) {
       console.log('FB.login() called when user is already connected.');
-      if (FBWorld.state('connected')){
+      if (FBWorld.state('connected')) {
         callback(getStatus('standard'));
       }else{
         simulatePromptToConnect(callback, options);
@@ -23,34 +23,34 @@
     }
   }
 
-  function logout(callback){
+  function logout(callback) {
     if (calledBeforeInit('logout')) return;
     if (!FBWorld.state('loggedIn')) console.log('FB.logout() called without a session.');
     FBWorld.notLoggedIn();
     callback(getStatus());
   }
 
-  function getLoginStatus(callback, perms){
+  function getLoginStatus(callback, perms) {
     if (calledBeforeInit('getLoginStatus')) return;
     callback(getStatus(perms ? 'extended' : false));
   }
 
-  function getSession(){
+  function getSession() {
     if (calledBeforeInit('getSession')) return false;
     return getStatus().session;
   }
 
-  function api(location, callback){
-    if(!FBWorld.state('connected')){
+  function api(location, callback) {
+    if(!FBWorld.state('connected')) {
       callback(undefined);
-    }else if(location == '/me/friends'){
+    }else if(location == '/me/friends') {
       callback({data:FBWorld.friendList()});
     }
   }
 
   // FBWorld Functions
   //3 states: loggedOut, loggedIn, connected
-  function state(){
+  function state() {
     var theState = JSON.parse(FBWorld.Helpers.makeMeACookie('fb-stub') || '{}');
     if (arguments.length === 0) return theState;
     if (arguments.length === 1) return theState[arguments[0]];
@@ -67,55 +67,55 @@
     }
   }
 
-  function uid(){
+  function uid() {
     return FBWorld.state('uid');
   }
 
-  function setUid(newUid){
+  function setUid(newUid) {
     return FBWorld.state('uid', newUid);
   }
 
-  function setExtendedPermissions(newPermissions){
+  function setExtendedPermissions(newPermissions) {
     return FBWorld.state('perms', 'extended', newPermissions);
   }
 
-  function setSecret(newSecret){
+  function setSecret(newSecret) {
     return state('secret', newSecret);
   }
 
-  function loggedIn(){
+  function loggedIn() {
     createConnectedCookie();
     FBWorld.state('loggedIn', true);
     return true;
   }
 
-  function notLoggedIn(){
+  function notLoggedIn() {
     deleteConnectedCookie();
     FBWorld.state('loggedIn', false);
   }
 
-  function connected(){
+  function connected() {
     createConnectedCookie();
     FBWorld.state('connected', true);
   }
 
-  function notConnected(){
+  function notConnected() {
     deleteConnectedCookie();
     FBWorld.state('connected', false);
   }
 
-  function addFriend(id, name){
+  function addFriend(id, name) {
     var friends = FBWorld.friendList();
     friends.push({id: id, name: name});
     FBWorld.Helpers.makeMeACookie('fb_friends', JSON.stringify(friends));
   }
 
-  function friendList(){
+  function friendList() {
     return JSON.parse(FBWorld.Helpers.makeMeACookie('fb_friends') || '[]');
   }
 
   var XFBML = {
-    parse: function(element, callback){
+    parse: function(element, callback) {
       callback();
     }
   };
@@ -164,10 +164,10 @@
     var theState = FBWorld.state();
 
     // Connected
-    if (theState.loggedIn && theState.connected){
+    if (theState.loggedIn && theState.connected) {
       var status = {
         status: "connected",
-        session: createConnectedCookie()
+        authResponse: createConnectedCookie()
       };
 
       if(typeof(permissions) != 'undefined') {
@@ -177,10 +177,10 @@
     }
 
     // not connected
-    if (theState.loggedIn && !theState.connected){
+    if (theState.loggedIn && !theState.connected) {
       return {
         perms: null,
-        session: null,
+        authResponse: null,
         status: 'notConnected'
       };
     }
@@ -189,7 +189,7 @@
     if (!theState.loggedIn) {
       return {
         perms: null,
-        session: null,
+        authResponse: null,
         status: 'unknown'
       };
     }
@@ -205,12 +205,12 @@
   function simulatePromptToLogin(callback, options) {
     // simulate being prompted to log in
     FBWorld.beingPromptedToLogIn = true;
-    FBWorld.beingPromptedToLogInCallback = function(approved){
+    FBWorld.beingPromptedToLogInCallback = function(approved) {
       FBWorld.beingPromptedToLogin = false;
       FBWorld.beingPromptedToLoginCallback = undefined;
-      if(approved){
+      if(approved) {
         FBWorld.loggedIn();
-        if (!FBWorld.state('connected')){
+        if (!FBWorld.state('connected')) {
           simulatePromptToConnect(callback, options);
         }else{
           FBWorld.state('perms', 'standard', options.perms);
@@ -227,11 +227,11 @@
   function simulatePromptToConnect(callback, options) {
     // simulate being prompted to connect
     FBWorld.beingPromptedToConnect = true;
-    FBWorld.beingPromptedToConnectCallback = function(approved){
+    FBWorld.beingPromptedToConnectCallback = function(approved) {
       approved ? FBWorld.connected() : FBWorld.notConnected();
       FBWorld.beingPromptedToConnect = false;
       FBWorld.beingPromptedToConnectCallback = undefined;
-      if (approved){
+      if (approved) {
         FBWorld.state('perms', 'standard', options.perms);
       }
       callback(getStatus('standard'));
@@ -251,53 +251,100 @@
   var cookieOptions = { path: '/', domain: window.location.hostname.replace(/^www/, '')};
 
   // cookie looks like this: (with the quotes): "access_token=theToken&base_domain=local-change.org&expires=0&secret=theSecret&session_key=theSessionKeysig=theSig-Hashed&uid=theUID"
-  function createConnectedCookie(){
-    var defaultValues = {
-      access_token: 'theToken',
-      base_domain: window.location.hostname.replace(/^www\./, ''),
-      secret: state('secret') || 'theSecret',
-      session_key: 'sessionKey',
-      expires: 0,
-      uid: state('uid')
+  function createConnectedCookie() {
+    var theState = {
+      user_id: state('uid'),
+      code: 'theAccessToken|hashData',
+      // We need to verify the timezone for this value. Traditionally FB uses PST8PDT, but it may be UTC.
+      issued_at: Math.floor(new Date().getTime() / 1000)
     };
-    if (uid() != null){
-      defaultValues.uid = uid();
+
+    if (uid() != null) {
+      theState.uid = uid();
     }
-    var theState = addSig(defaultValues);
-    FBWorld.Helpers.makeMeACookie('fbs_'+state('appId'), cookieToString(theState), cookieOptions);
+
+    FBWorld.Helpers.makeMeACookie('fbsr_'+state('appId'), cookieToString(theState, state('secret')), cookieOptions);
     return theState;
   }
 
-  function addSig(theState){
-    theState['sig'] = FBWorld.Helpers.md5.hex_md5(cookieToString(theState, true));
-    return theState;
+  function cookieToString(theState, secret) {
+    // Set the algorithm here, to keep any changes here.
+    theState.algorithm = 'HMAC-SHA256';
+
+    var payload        = JSON.stringify(theState),
+        encodedPayload = FBWorld.Helpers.base64_encode(payload),
+        shaObj         = new FBWorld.Helpers.jsSHA(encodedPayload, "ASCII"),
+        b64Signature   = shaObj.getHMAC(secret, "ASCII", "SHA-256", "B64");
+
+    // jsSHA uses an odd Base64 encoder, which uses + where FB has -. For now we'll just replace them,
+    // but if we find other inconsistencies, we should use the HEX value and encode it ourselves.
+    b64Signature.replace('+', '-');
+
+    return b64Signature + '.' + encodedPayload;
   }
 
-  function cookieToString(theState, forSig){
-    var response = [], fields;
-    if (typeof forSig == 'undefined')
-      fields = ['access_token', 'base_domain', 'expires', 'secret', 'session_key', 'sig', 'uid'];
-    else
-      fields = ['access_token', 'base_domain', 'expires', 'secret', 'session_key', 'uid'];
-    for (var i =0; i < fields.length; i++){
-      var field = fields[i];
-      response.push(field + '=' + theState[field]);
-    }
-    if (typeof forSig != 'undefined'){
-      response = response.join('') + theState['secret'];
-    }else{
-      response = response.join('&');
-    }
-    return response;
-  }
-  function deleteConnectedCookie(){
-    FBWorld.Helpers.makeMeACookie('fbs_'+state('appId'), null, cookieOptions);
+  function deleteConnectedCookie() {
+    FBWorld.Helpers.makeMeACookie('fbsr_'+state('appId'), null, cookieOptions);
   }
 
 
 })(this);
 FBWorld.Helpers = {};
 setTimeout(function() { if (typeof fbAsyncInit === 'function') fbAsyncInit(); }, 1);
+FBWorld.Helpers.base64_encode = function (data, utf8encode) {
+    // http://kevin.vanzonneveld.net
+    // +   original by: Tyler Akins (http://rumkin.com)
+    // +   improved by: Bayron Guevara
+    // +   improved by: Thunder.m
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   bugfixed by: Pellentesque Malesuada
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   improved by: Rafał Kukawski (http://kukawski.pl)
+    // -    depends on: utf8_encode
+    // *     example 1: base64_encode('Kevin van Zonneveld');
+    // *     returns 1: 'S2V2aW4gdmFuIFpvbm5ldmVsZA=='
+    // mozilla has this native
+    // - but breaks in 2.0.0.12!
+    //if (typeof this.window['atob'] == 'function') {
+    //    return atob(data);
+    //}
+    var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
+        ac = 0,
+        enc = "",
+        tmp_arr = [];
+
+    if (!data) {
+        return data;
+    }
+
+    // Only do this if forced
+    if (utf8encode)
+    data = this.utf8_encode(data + '');
+
+    do { // pack three octets into four hexets
+        o1 = data.charCodeAt(i++);
+        o2 = data.charCodeAt(i++);
+        o3 = data.charCodeAt(i++);
+
+        bits = o1 << 16 | o2 << 8 | o3;
+
+        h1 = bits >> 18 & 0x3f;
+        h2 = bits >> 12 & 0x3f;
+        h3 = bits >> 6 & 0x3f;
+        h4 = bits & 0x3f;
+
+        // use hexets to index into b64, and append result to encoded string
+        tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
+    } while (i < data.length);
+
+    enc = tmp_arr.join('');
+
+    var r = data.length % 3;
+
+    return (r ? enc.slice(0, r - 3) : enc) + '==='.slice(r || 3);
+
+};
 /**
  * Cookie plugin
  *
@@ -353,7 +400,7 @@ setTimeout(function() { if (typeof fbAsyncInit === 'function') fbAsyncInit(); },
  * @cat Plugins/Cookie
  * @author Klaus Hartl/klaus.hartl@stilbuero.de
  */
- 
+
 // Modified to make it not use jquery
 FBWorld.Helpers.makeMeACookie = function(name, value, options) {
     if (typeof value != 'undefined') { // name and value given, set cookie
@@ -405,267 +452,64 @@ FBWorld.Helpers.trim = function( text ) {
     "" :
     text.toString().replace( /^\s+/, "" ).replace( /\s+$/, "" );
 };
-//md5 generation of sig (THANK YOU INTERNETS)
-FBWorld.Helpers.md5 = (function(){
-
-/*
- * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
- * Digest Algorithm, as defined in RFC 1321.
- * Version 2.2 Copyright (C) Paul Johnston 1999 - 2009
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+/* A JavaScript implementation of the SHA family of hashes, as defined in FIPS
+ * PUB 180-2 as well as the corresponding HMAC implementation as defined in
+ * FIPS PUB 198a
+ *
+ * Version 1.3 Copyright Brian Turek 2008-2010
  * Distributed under the BSD License
- * See http://pajhome.org.uk/crypt/md5 for more info.
+ * See http://jssha.sourceforge.net/ for more information
+ *
+ * Several functions taken from Paul Johnson
  */
+(function(){var charSize=8,b64pad="",hexCase=0,str2binb=function(a){var b=[],mask=(1<<charSize)-1,length=a.length*charSize,i;for(i=0;i<length;i+=charSize){b[i>>5]|=(a.charCodeAt(i/charSize)&mask)<<(32-charSize-(i%32))}return b},hex2binb=function(a){var b=[],length=a.length,i,num;for(i=0;i<length;i+=2){num=parseInt(a.substr(i,2),16);if(!isNaN(num)){b[i>>3]|=num<<(24-(4*(i%8)))}else{return"INVALID HEX STRING"}}return b},binb2hex=function(a){var b=(hexCase)?"0123456789ABCDEF":"0123456789abcdef",str="",length=a.length*4,i,srcByte;for(i=0;i<length;i+=1){srcByte=a[i>>2]>>((3-(i%4))*8);str+=b.charAt((srcByte>>4)&0xF)+b.charAt(srcByte&0xF)}return str},binb2b64=function(a){var b="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"+"0123456789+/",str="",length=a.length*4,i,j,triplet;for(i=0;i<length;i+=3){triplet=(((a[i>>2]>>8*(3-i%4))&0xFF)<<16)|(((a[i+1>>2]>>8*(3-(i+1)%4))&0xFF)<<8)|((a[i+2>>2]>>8*(3-(i+2)%4))&0xFF);for(j=0;j<4;j+=1){if(i*8+j*6<=a.length*32){str+=b.charAt((triplet>>6*(3-j))&0x3F)}else{str+=b64pad}}}return str},rotr=function(x,n){return(x>>>n)|(x<<(32-n))},shr=function(x,n){return x>>>n},ch=function(x,y,z){return(x&y)^(~x&z)},maj=function(x,y,z){return(x&y)^(x&z)^(y&z)},sigma0=function(x){return rotr(x,2)^rotr(x,13)^rotr(x,22)},sigma1=function(x){return rotr(x,6)^rotr(x,11)^rotr(x,25)},gamma0=function(x){return rotr(x,7)^rotr(x,18)^shr(x,3)},gamma1=function(x){return rotr(x,17)^rotr(x,19)^shr(x,10)},safeAdd_2=function(x,y){var a=(x&0xFFFF)+(y&0xFFFF),msw=(x>>>16)+(y>>>16)+(a>>>16);return((msw&0xFFFF)<<16)|(a&0xFFFF)},safeAdd_4=function(a,b,c,d){var e=(a&0xFFFF)+(b&0xFFFF)+(c&0xFFFF)+(d&0xFFFF),msw=(a>>>16)+(b>>>16)+(c>>>16)+(d>>>16)+(e>>>16);return((msw&0xFFFF)<<16)|(e&0xFFFF)},safeAdd_5=function(a,b,c,d,e){var f=(a&0xFFFF)+(b&0xFFFF)+(c&0xFFFF)+(d&0xFFFF)+(e&0xFFFF),msw=(a>>>16)+(b>>>16)+(c>>>16)+(d>>>16)+(e>>>16)+(f>>>16);return((msw&0xFFFF)<<16)|(f&0xFFFF)},coreSHA2=function(j,k,l){var a,b,c,d,e,f,g,h,T1,T2,H,lengthPosition,i,t,K,W=[],appendedMessageLength;if(l==="SHA-224"||l==="SHA-256"){lengthPosition=(((k+65)>>9)<<4)+15;K=[0x428A2F98,0x71374491,0xB5C0FBCF,0xE9B5DBA5,0x3956C25B,0x59F111F1,0x923F82A4,0xAB1C5ED5,0xD807AA98,0x12835B01,0x243185BE,0x550C7DC3,0x72BE5D74,0x80DEB1FE,0x9BDC06A7,0xC19BF174,0xE49B69C1,0xEFBE4786,0x0FC19DC6,0x240CA1CC,0x2DE92C6F,0x4A7484AA,0x5CB0A9DC,0x76F988DA,0x983E5152,0xA831C66D,0xB00327C8,0xBF597FC7,0xC6E00BF3,0xD5A79147,0x06CA6351,0x14292967,0x27B70A85,0x2E1B2138,0x4D2C6DFC,0x53380D13,0x650A7354,0x766A0ABB,0x81C2C92E,0x92722C85,0xA2BFE8A1,0xA81A664B,0xC24B8B70,0xC76C51A3,0xD192E819,0xD6990624,0xF40E3585,0x106AA070,0x19A4C116,0x1E376C08,0x2748774C,0x34B0BCB5,0x391C0CB3,0x4ED8AA4A,0x5B9CCA4F,0x682E6FF3,0x748F82EE,0x78A5636F,0x84C87814,0x8CC70208,0x90BEFFFA,0xA4506CEB,0xBEF9A3F7,0xC67178F2];if(l==="SHA-224"){H=[0xc1059ed8,0x367cd507,0x3070dd17,0xf70e5939,0xffc00b31,0x68581511,0x64f98fa7,0xbefa4fa4]}else{H=[0x6A09E667,0xBB67AE85,0x3C6EF372,0xA54FF53A,0x510E527F,0x9B05688C,0x1F83D9AB,0x5BE0CD19]}}j[k>>5]|=0x80<<(24-k%32);j[lengthPosition]=k;appendedMessageLength=j.length;for(i=0;i<appendedMessageLength;i+=16){a=H[0];b=H[1];c=H[2];d=H[3];e=H[4];f=H[5];g=H[6];h=H[7];for(t=0;t<64;t+=1){if(t<16){W[t]=j[t+i]}else{W[t]=safeAdd_4(gamma1(W[t-2]),W[t-7],gamma0(W[t-15]),W[t-16])}T1=safeAdd_5(h,sigma1(e),ch(e,f,g),K[t],W[t]);T2=safeAdd_2(sigma0(a),maj(a,b,c));h=g;g=f;f=e;e=safeAdd_2(d,T1);d=c;c=b;b=a;a=safeAdd_2(T1,T2)}H[0]=safeAdd_2(a,H[0]);H[1]=safeAdd_2(b,H[1]);H[2]=safeAdd_2(c,H[2]);H[3]=safeAdd_2(d,H[3]);H[4]=safeAdd_2(e,H[4]);H[5]=safeAdd_2(f,H[5]);H[6]=safeAdd_2(g,H[6]);H[7]=safeAdd_2(h,H[7])}switch(l){case"SHA-224":return[H[0],H[1],H[2],H[3],H[4],H[5],H[6]];case"SHA-256":return H;default:return[]}},jsSHA=function(a,b){this.sha224=null;this.sha256=null;this.strBinLen=null;this.strToHash=null;if("HEX"===b){if(0!==(a.length%2)){return"TEXT MUST BE IN BYTE INCREMENTS"}this.strBinLen=a.length*4;this.strToHash=hex2binb(a)}else if(("ASCII"===b)||('undefined'===typeof(b))){this.strBinLen=a.length*charSize;this.strToHash=str2binb(a)}else{return"UNKNOWN TEXT INPUT TYPE"}};jsSHA.prototype={getHash:function(a,b){var c=null,message=this.strToHash.slice();switch(b){case"HEX":c=binb2hex;break;case"B64":c=binb2b64;break;default:return"FORMAT NOT RECOGNIZED"}switch(a){case"SHA-224":if(null===this.sha224){this.sha224=coreSHA2(message,this.strBinLen,a)}return c(this.sha224);case"SHA-256":if(null===this.sha256){this.sha256=coreSHA2(message,this.strBinLen,a)}return c(this.sha256);default:return"HASH NOT RECOGNIZED"}},getHMAC:function(a,b,c,d){var e,keyToUse,i,retVal,keyBinLen,hashBitSize,keyWithIPad=[],keyWithOPad=[];switch(d){case"HEX":e=binb2hex;break;case"B64":e=binb2b64;break;default:return"FORMAT NOT RECOGNIZED"}switch(c){case"SHA-224":hashBitSize=224;break;case"SHA-256":hashBitSize=256;break;default:return"HASH NOT RECOGNIZED"}if("HEX"===b){if(0!==(a.length%2)){return"KEY MUST BE IN BYTE INCREMENTS"}keyToUse=hex2binb(a);keyBinLen=a.length*4}else if("ASCII"===b){keyToUse=str2binb(a);keyBinLen=a.length*charSize}else{return"UNKNOWN KEY INPUT TYPE"}if(64<(keyBinLen/8)){keyToUse=coreSHA2(keyToUse,keyBinLen,c);keyToUse[15]&=0xFFFFFF00}else if(64>(keyBinLen/8)){keyToUse[15]&=0xFFFFFF00}for(i=0;i<=15;i+=1){keyWithIPad[i]=keyToUse[i]^0x36363636;keyWithOPad[i]=keyToUse[i]^0x5C5C5C5C}retVal=coreSHA2(keyWithIPad.concat(this.strToHash),512+this.strBinLen,c);retVal=coreSHA2(keyWithOPad.concat(retVal),512+hashBitSize,c);return(e(retVal))}};window.FBWorld.Helpers.jsSHA=jsSHA}());
+FBWorld.Helpers.utf8_encode = function (argString) {
+    // http://kevin.vanzonneveld.net
+    // +   original by: Webtoolkit.info (http://www.webtoolkit.info/)
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   improved by: sowberry
+    // +    tweaked by: Jack
+    // +   bugfixed by: Onno Marsman
+    // +   improved by: Yves Sucaet
+    // +   bugfixed by: Onno Marsman
+    // +   bugfixed by: Ulrich
+    // +   bugfixed by: Rafal Kukawski
+    // *     example 1: utf8_encode('Kevin van Zonneveld');
+    // *     returns 1: 'Kevin van Zonneveld'
 
-/*
- * Configurable variables. You may need to tweak these to be compatible with
- * the server-side, but the defaults work in most cases.
- */
-var hexcase = 0;   /* hex output format. 0 - lowercase; 1 - uppercase        */
-var b64pad  = "";  /* base-64 pad character. "=" for strict RFC compliance   */
-
-/*
- * These are the functions you'll usually want to call
- * They take string arguments and return either hex or base-64 encoded strings
- */
-function hex_md5(s)    { return rstr2hex(rstr_md5(str2rstr_utf8(s))); }
-
-
-/*
- * Calculate the MD5 of a raw string
- */
-function rstr_md5(s)
-{
-  return binl2rstr(binl_md5(rstr2binl(s), s.length * 8));
-}
-
-/*
- * Convert a raw string to a hex string
- */
-function rstr2hex(input)
-{
-  try { hexcase; } catch(e) { hexcase=0; }
-  var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
-  var output = "";
-  var x;
-  for(var i = 0; i < input.length; i++)
-  {
-    x = input.charCodeAt(i);
-    output += hex_tab.charAt((x >>> 4) & 0x0F)
-           +  hex_tab.charAt( x        & 0x0F);
-  }
-  return output;
-}
-
-
-
-/*
- * Encode a string as utf-8.
- * For efficiency, this assumes the input is valid utf-16.
- */
-function str2rstr_utf8(input)
-{
-  var output = "";
-  var i = -1;
-  var x, y;
-
-  while(++i < input.length)
-  {
-    /* Decode utf-16 surrogate pairs */
-    x = input.charCodeAt(i);
-    y = i + 1 < input.length ? input.charCodeAt(i + 1) : 0;
-    if(0xD800 <= x && x <= 0xDBFF && 0xDC00 <= y && y <= 0xDFFF)
-    {
-      x = 0x10000 + ((x & 0x03FF) << 10) + (y & 0x03FF);
-      i++;
+    if (argString === null || typeof argString === "undefined") {
+        return "";
     }
 
-    /* Encode output as utf-8 */
-    if(x <= 0x7F)
-      output += String.fromCharCode(x);
-    else if(x <= 0x7FF)
-      output += String.fromCharCode(0xC0 | ((x >>> 6 ) & 0x1F),
-                                    0x80 | ( x         & 0x3F));
-    else if(x <= 0xFFFF)
-      output += String.fromCharCode(0xE0 | ((x >>> 12) & 0x0F),
-                                    0x80 | ((x >>> 6 ) & 0x3F),
-                                    0x80 | ( x         & 0x3F));
-    else if(x <= 0x1FFFFF)
-      output += String.fromCharCode(0xF0 | ((x >>> 18) & 0x07),
-                                    0x80 | ((x >>> 12) & 0x3F),
-                                    0x80 | ((x >>> 6 ) & 0x3F),
-                                    0x80 | ( x         & 0x3F));
-  }
-  return output;
+    var string = (argString + ''); // .replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    var utftext = "",
+        start, end, stringl = 0;
+
+    start = end = 0;
+    stringl = string.length;
+    for (var n = 0; n < stringl; n++) {
+        var c1 = string.charCodeAt(n);
+        var enc = null;
+
+        if (c1 < 128) {
+            end++;
+        } else if (c1 > 127 && c1 < 2048) {
+            enc = String.fromCharCode((c1 >> 6) | 192) + String.fromCharCode((c1 & 63) | 128);
+        } else {
+            enc = String.fromCharCode((c1 >> 12) | 224) + String.fromCharCode(((c1 >> 6) & 63) | 128) + String.fromCharCode((c1 & 63) | 128);
+        }
+        if (enc !== null) {
+            if (end > start) {
+                utftext += string.slice(start, end);
+            }
+            utftext += enc;
+            start = end = n + 1;
+        }
+    }
+
+    if (end > start) {
+        utftext += string.slice(start, stringl);
+    }
+
+    return utftext;
 }
-
-
-/*
- * Convert a raw string to an array of little-endian words
- * Characters >255 have their high-byte silently ignored.
- */
-function rstr2binl(input)
-{
-  var output = Array(input.length >> 2);
-  var i;
-  for(i = 0; i < output.length; i++)
-    output[i] = 0;
-  for(i = 0; i < input.length * 8; i += 8)
-    output[i>>5] |= (input.charCodeAt(i / 8) & 0xFF) << (i%32);
-  return output;
-}
-
-/*
- * Convert an array of little-endian words to a string
- */
-function binl2rstr(input)
-{
-  var output = "";
-  for(var i = 0; i < input.length * 32; i += 8)
-    output += String.fromCharCode((input[i>>5] >>> (i % 32)) & 0xFF);
-  return output;
-}
-
-/*
- * Calculate the MD5 of an array of little-endian words, and a bit length.
- */
-function binl_md5(x, len)
-{
-  /* append padding */
-  x[len >> 5] |= 0x80 << ((len) % 32);
-  x[(((len + 64) >>> 9) << 4) + 14] = len;
-
-  var a =  1732584193;
-  var b = -271733879;
-  var c = -1732584194;
-  var d =  271733878;
-
-  for(var i = 0; i < x.length; i += 16)
-  {
-    var olda = a;
-    var oldb = b;
-    var oldc = c;
-    var oldd = d;
-
-    a = md5_ff(a, b, c, d, x[i+ 0], 7 , -680876936);
-    d = md5_ff(d, a, b, c, x[i+ 1], 12, -389564586);
-    c = md5_ff(c, d, a, b, x[i+ 2], 17,  606105819);
-    b = md5_ff(b, c, d, a, x[i+ 3], 22, -1044525330);
-    a = md5_ff(a, b, c, d, x[i+ 4], 7 , -176418897);
-    d = md5_ff(d, a, b, c, x[i+ 5], 12,  1200080426);
-    c = md5_ff(c, d, a, b, x[i+ 6], 17, -1473231341);
-    b = md5_ff(b, c, d, a, x[i+ 7], 22, -45705983);
-    a = md5_ff(a, b, c, d, x[i+ 8], 7 ,  1770035416);
-    d = md5_ff(d, a, b, c, x[i+ 9], 12, -1958414417);
-    c = md5_ff(c, d, a, b, x[i+10], 17, -42063);
-    b = md5_ff(b, c, d, a, x[i+11], 22, -1990404162);
-    a = md5_ff(a, b, c, d, x[i+12], 7 ,  1804603682);
-    d = md5_ff(d, a, b, c, x[i+13], 12, -40341101);
-    c = md5_ff(c, d, a, b, x[i+14], 17, -1502002290);
-    b = md5_ff(b, c, d, a, x[i+15], 22,  1236535329);
-
-    a = md5_gg(a, b, c, d, x[i+ 1], 5 , -165796510);
-    d = md5_gg(d, a, b, c, x[i+ 6], 9 , -1069501632);
-    c = md5_gg(c, d, a, b, x[i+11], 14,  643717713);
-    b = md5_gg(b, c, d, a, x[i+ 0], 20, -373897302);
-    a = md5_gg(a, b, c, d, x[i+ 5], 5 , -701558691);
-    d = md5_gg(d, a, b, c, x[i+10], 9 ,  38016083);
-    c = md5_gg(c, d, a, b, x[i+15], 14, -660478335);
-    b = md5_gg(b, c, d, a, x[i+ 4], 20, -405537848);
-    a = md5_gg(a, b, c, d, x[i+ 9], 5 ,  568446438);
-    d = md5_gg(d, a, b, c, x[i+14], 9 , -1019803690);
-    c = md5_gg(c, d, a, b, x[i+ 3], 14, -187363961);
-    b = md5_gg(b, c, d, a, x[i+ 8], 20,  1163531501);
-    a = md5_gg(a, b, c, d, x[i+13], 5 , -1444681467);
-    d = md5_gg(d, a, b, c, x[i+ 2], 9 , -51403784);
-    c = md5_gg(c, d, a, b, x[i+ 7], 14,  1735328473);
-    b = md5_gg(b, c, d, a, x[i+12], 20, -1926607734);
-
-    a = md5_hh(a, b, c, d, x[i+ 5], 4 , -378558);
-    d = md5_hh(d, a, b, c, x[i+ 8], 11, -2022574463);
-    c = md5_hh(c, d, a, b, x[i+11], 16,  1839030562);
-    b = md5_hh(b, c, d, a, x[i+14], 23, -35309556);
-    a = md5_hh(a, b, c, d, x[i+ 1], 4 , -1530992060);
-    d = md5_hh(d, a, b, c, x[i+ 4], 11,  1272893353);
-    c = md5_hh(c, d, a, b, x[i+ 7], 16, -155497632);
-    b = md5_hh(b, c, d, a, x[i+10], 23, -1094730640);
-    a = md5_hh(a, b, c, d, x[i+13], 4 ,  681279174);
-    d = md5_hh(d, a, b, c, x[i+ 0], 11, -358537222);
-    c = md5_hh(c, d, a, b, x[i+ 3], 16, -722521979);
-    b = md5_hh(b, c, d, a, x[i+ 6], 23,  76029189);
-    a = md5_hh(a, b, c, d, x[i+ 9], 4 , -640364487);
-    d = md5_hh(d, a, b, c, x[i+12], 11, -421815835);
-    c = md5_hh(c, d, a, b, x[i+15], 16,  530742520);
-    b = md5_hh(b, c, d, a, x[i+ 2], 23, -995338651);
-
-    a = md5_ii(a, b, c, d, x[i+ 0], 6 , -198630844);
-    d = md5_ii(d, a, b, c, x[i+ 7], 10,  1126891415);
-    c = md5_ii(c, d, a, b, x[i+14], 15, -1416354905);
-    b = md5_ii(b, c, d, a, x[i+ 5], 21, -57434055);
-    a = md5_ii(a, b, c, d, x[i+12], 6 ,  1700485571);
-    d = md5_ii(d, a, b, c, x[i+ 3], 10, -1894986606);
-    c = md5_ii(c, d, a, b, x[i+10], 15, -1051523);
-    b = md5_ii(b, c, d, a, x[i+ 1], 21, -2054922799);
-    a = md5_ii(a, b, c, d, x[i+ 8], 6 ,  1873313359);
-    d = md5_ii(d, a, b, c, x[i+15], 10, -30611744);
-    c = md5_ii(c, d, a, b, x[i+ 6], 15, -1560198380);
-    b = md5_ii(b, c, d, a, x[i+13], 21,  1309151649);
-    a = md5_ii(a, b, c, d, x[i+ 4], 6 , -145523070);
-    d = md5_ii(d, a, b, c, x[i+11], 10, -1120210379);
-    c = md5_ii(c, d, a, b, x[i+ 2], 15,  718787259);
-    b = md5_ii(b, c, d, a, x[i+ 9], 21, -343485551);
-
-    a = safe_add(a, olda);
-    b = safe_add(b, oldb);
-    c = safe_add(c, oldc);
-    d = safe_add(d, oldd);
-  }
-  return Array(a, b, c, d);
-}
-
-/*
- * These functions implement the four basic operations the algorithm uses.
- */
-function md5_cmn(q, a, b, x, s, t)
-{
-  return safe_add(bit_rol(safe_add(safe_add(a, q), safe_add(x, t)), s),b);
-}
-function md5_ff(a, b, c, d, x, s, t)
-{
-  return md5_cmn((b & c) | ((~b) & d), a, b, x, s, t);
-}
-function md5_gg(a, b, c, d, x, s, t)
-{
-  return md5_cmn((b & d) | (c & (~d)), a, b, x, s, t);
-}
-function md5_hh(a, b, c, d, x, s, t)
-{
-  return md5_cmn(b ^ c ^ d, a, b, x, s, t);
-}
-function md5_ii(a, b, c, d, x, s, t)
-{
-  return md5_cmn(c ^ (b | (~d)), a, b, x, s, t);
-}
-
-/*
- * Add integers, wrapping at 2^32. This uses 16-bit operations internally
- * to work around bugs in some JS interpreters.
- */
-function safe_add(x, y)
-{
-  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-  return (msw << 16) | (lsw & 0xFFFF);
-}
-
-/*
- * Bitwise rotate a 32-bit number to the left.
- */
-function bit_rol(num, cnt)
-{
-  return (num << cnt) | (num >>> (32 - cnt));
-}
-return {
-  hex_md5: hex_md5
-};
-})();
