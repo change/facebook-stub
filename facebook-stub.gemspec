@@ -5,8 +5,8 @@ require "facebook-stub/version"
 Gem::Specification.new do |s|
   s.name        = "facebook-stub"
   s.version     = Facebook::Stub::VERSION
-  s.authors     = ["Erik Ogan"]
-  s.email       = ["erik@change.org"]
+  s.authors     = ["Change.org"]
+  s.email       = ["techops@change.org"]
   s.homepage    = ""
   s.summary     = %q{TODO: Write a gem summary}
   s.description = %q{TODO: Write a gem description}
