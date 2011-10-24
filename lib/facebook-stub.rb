@@ -40,6 +40,10 @@ module Facebook
       @info
     end
 
+    def Stub::invalid!
+      @info = {}
+    end
+
     Stub::reset!
   end
 end
