@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Change.org"]
   s.email       = ["techops@change.org"]
   s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.summary     = %q{Stub out the FB JS API}
+  s.description = %q{facebook-stub is a gem for stubbing out the Facebook JavaScript API in acceptance and integration tests.}
 
   s.rubyforge_project = "facebook-stub"
 
