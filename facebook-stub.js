@@ -41,10 +41,17 @@
   }
 
   function api(location, callback) {
-    if(!FBWorld.state('connected')) {
+    if (!FBWorld.state('connected')) {
       callback(undefined);
-    }else if(location == '/me/friends') {
+    } else if (location == '/me/friends') {
       callback({data:FBWorld.friendList()});
+    } else if (location == '/me/permissions') {
+      var theState = FBWorld.state();
+      var perms;
+      if (theState && theState.perms) {
+        perms = {data:[theState.perms.extended]}
+      }
+      callback( perms );
     }
   }
 
