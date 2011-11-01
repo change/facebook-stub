@@ -15,10 +15,10 @@
       console.log('FB.login() called when user is already connected.');
       if (FBWorld.state('connected')) {
         callback(getStatus('standard'));
-      }else{
+      } else {
         simulatePromptToConnect(callback, options);
       }
-    }else{
+    } else {
       simulatePromptToLogin(callback, options);
     }
   }
@@ -219,11 +219,11 @@
         FBWorld.loggedIn();
         if (!FBWorld.state('connected')) {
           simulatePromptToConnect(callback, options);
-        }else{
+        } else {
           FBWorld.state('perms', 'standard', options.perms);
           callback(getStatus('standard'));
         }
-      }else{
+      } else {
         FBWorld.notLoggedIn();
         callback(getStatus());
       }
