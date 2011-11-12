@@ -81,6 +81,10 @@
   function setUid(newUid) {
     return FBWorld.state('uid', newUid);
   }
+  
+  function appId() {
+    return FBWorld.state('appId');
+  }
 
   function setExtendedPermissions(newPermissions) {
     return FBWorld.state('perms', 'extended', newPermissions);
@@ -144,6 +148,7 @@
     setUid                  : setUid,
     setSecret               : setSecret,
     uid                     : uid,
+    appId                   : appId,
     connected               : connected,
     notConnected            : notConnected,
     setExtendedPermissions  : setExtendedPermissions,
