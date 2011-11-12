@@ -170,6 +170,9 @@
     friendList                       : friendList
   };
 
+  if (FBWorld.Helpers) FBWorld.Helpers.resetMyCookies();
+  else document.$cookie = {};
+
   // PRIVATE FUNCTIONS
 
   function getStatus(permissions) {
@@ -413,6 +416,15 @@ FBWorld.Helpers.base64_encode = function (data, utf8encode) {
  * @author Klaus Hartl/klaus.hartl@stilbuero.de
  */
 
+FBWorld.Helpers.resetMyCookies = function() {
+	if (document.$cookie) {
+		for (var name in document.$cookie) {
+			FBWorld.Helpers.makeMeACookie(name, null);
+		}
+	}
+	document.$cookie = {};
+}
+
 // Modified to make it not use jquery
 FBWorld.Helpers.makeMeACookie = function(name, value, options) {
     if (typeof value != 'undefined') { // name and value given, set cookie
@@ -440,11 +452,13 @@ FBWorld.Helpers.makeMeACookie = function(name, value, options) {
         var path = options.path ? '; path=' + (options.path) : '';
         var domain = options.domain ? '; domain=' + (options.domain) : '';
         var secure = options.secure ? '; secure' : '';
-        document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+        var toAssign = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+        document.$cookie[name] = value && toAssign;
+        document.cookie = toAssign;
     } else { // only name given, get cookie
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
+        var cookieValue = null, dcookie = document.cookie || document.$cookie[name];
+        if (dcookie && dcookie != '') {
+            var cookies = dcookie.split(';');
             for (var i = 0; i < cookies.length; i++) {
                 var cookie = FBWorld.Helpers.trim(cookies[i]);
                 // Does this cookie string begin with the name we want?

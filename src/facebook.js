@@ -170,6 +170,9 @@
     friendList                       : friendList
   };
 
+  if (FBWorld.Helpers) FBWorld.Helpers.resetMyCookies();
+  else document.$cookie = {};
+
   // PRIVATE FUNCTIONS
 
   function getStatus(permissions) {
