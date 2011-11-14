@@ -125,6 +125,21 @@
     return JSON.parse(FBWorld.Helpers.makeMeACookie('fb_friends') || '[]');
   }
 
+  function reset() {
+    FBWorld.initialized = false;
+    FBWorld.beingPromptedToLogIn = false;
+    FBWorld.beingPromptedToLogInCallback = undefined;
+    // this will come later, no need for it now
+    // successfullyLogin: successfullyLogin,
+    // failToLogin: failToLogin,
+
+    FBWorld.beingPromptedToConnect = false;
+    FBWorld.beingPromptedToConnectInCallback = undefined;
+
+    if (FBWorld.Helpers) FBWorld.Helpers.resetMyCookies();
+    else document.$cookie = {};
+  }
+  
   var XFBML = {
     parse: function(element, callback) {
       callback();
@@ -152,16 +167,9 @@
     connected               : connected,
     notConnected            : notConnected,
     setExtendedPermissions  : setExtendedPermissions,
+    
+    reset                   : reset,
 
-    initialized                      : false,
-    beingPromptedToLogIn             : false,
-    beingPromptedToLogInCallback     : undefined,
-    // this will come later, no need for it now
-    // successfullyLogin: successfullyLogin,
-    // failToLogin: failToLogin,
-
-    beingPromptedToConnect           : false,
-    beingPromptedToConnectInCallback : undefined,
     allowConnection                  : allowConnection,
     denyConnection                   : denyConnection,
 
@@ -169,9 +177,8 @@
     addFriend                        : addFriend,
     friendList                       : friendList
   };
-
-  if (FBWorld.Helpers) FBWorld.Helpers.resetMyCookies();
-  else document.$cookie = {};
+  
+  FBWorld.reset();
 
   // PRIVATE FUNCTIONS
 
