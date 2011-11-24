@@ -31,7 +31,7 @@ you will need to respond with either
     FBWorld.allowConnection(); or
     FBWorld.denyConnection();
 
-The difference between being not being logged in and connecting and being not logged in has not been flushed out yet, as it's purely a facebook state. In terms of the app, you're either connected or not. 
+The difference between being not being logged in and connecting and being not logged in has not been flushed out yet, as it's purely a facebook state. In terms of the app, you're either connected or not.
 
 
 ### Helper Functions ###
@@ -46,3 +46,11 @@ FBWorld provides you with these helper functions for debugging your application 
 # Forking Instructions #
 
 If you modify facebook-stub.js directly it will be overwritten by builder/concat. Modify src/ files only
+
+# LICENSE: [MIT](http://www.opensource.org/licenses/mit-license.php) #
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
