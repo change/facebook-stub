@@ -35,6 +35,12 @@
     callback(getStatus(perms ? 'extended' : false));
   }
 
+  function getUserID() {
+    if (calledBeforeInit('getUserID')) return;
+    return uid();
+  }
+
+
   function getSession() {
     if (calledBeforeInit('getSession')) return false;
     return getStatus().session;
@@ -134,7 +140,8 @@
     init           : init,
     getSession     : getSession,
     api            : api,
-    XFBML          : XFBML
+    XFBML          : XFBML,
+    getUserID      : getUserID
   };
 
   FBWorld = { // used to set the state of Facebook
