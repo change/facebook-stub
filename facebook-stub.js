@@ -87,6 +87,10 @@
   function setUid(newUid) {
     return FBWorld.state('uid', newUid);
   }
+  
+  function appId() {
+    return FBWorld.state('appId');
+  }
 
   function setExtendedPermissions(newPermissions) {
     return FBWorld.state('perms', 'extended', newPermissions);
@@ -127,6 +131,21 @@
     return JSON.parse(FBWorld.Helpers.makeMeACookie('fb_friends') || '[]');
   }
 
+  function reset() {
+    FBWorld.initialized = false;
+    FBWorld.beingPromptedToLogIn = false;
+    FBWorld.beingPromptedToLogInCallback = undefined;
+    // this will come later, no need for it now
+    // successfullyLogin: successfullyLogin,
+    // failToLogin: failToLogin,
+
+    FBWorld.beingPromptedToConnect = false;
+    FBWorld.beingPromptedToConnectInCallback = undefined;
+
+    if (FBWorld.Helpers) FBWorld.Helpers.resetMyCookies();
+    else document.$cookie = {};
+  }
+  
   var XFBML = {
     parse: function(element, callback) {
       callback();
@@ -151,19 +170,13 @@
     setUid                  : setUid,
     setSecret               : setSecret,
     uid                     : uid,
+    appId                   : appId,
     connected               : connected,
     notConnected            : notConnected,
     setExtendedPermissions  : setExtendedPermissions,
+    
+    reset                   : reset,
 
-    initialized                      : false,
-    beingPromptedToLogIn             : false,
-    beingPromptedToLogInCallback     : undefined,
-    // this will come later, no need for it now
-    // successfullyLogin: successfullyLogin,
-    // failToLogin: failToLogin,
-
-    beingPromptedToConnect           : false,
-    beingPromptedToConnectInCallback : undefined,
     allowConnection                  : allowConnection,
     denyConnection                   : denyConnection,
 
@@ -171,6 +184,8 @@
     addFriend                        : addFriend,
     friendList                       : friendList
   };
+  
+  FBWorld.reset();
 
   // PRIVATE FUNCTIONS
 
@@ -220,8 +235,8 @@
     // simulate being prompted to log in
     FBWorld.beingPromptedToLogIn = true;
     FBWorld.beingPromptedToLogInCallback = function(approved) {
-      FBWorld.beingPromptedToLogin = false;
-      FBWorld.beingPromptedToLoginCallback = undefined;
+      FBWorld.beingPromptedToLogIn = false;
+      FBWorld.beingPromptedToLogInCallback = undefined;
       if(approved) {
         FBWorld.loggedIn();
         if (!FBWorld.state('connected')) {
@@ -415,6 +430,15 @@ FBWorld.Helpers.base64_encode = function (data, utf8encode) {
  * @author Klaus Hartl/klaus.hartl@stilbuero.de
  */
 
+FBWorld.Helpers.resetMyCookies = function() {
+	if (document.$cookie) {
+		for (var name in document.$cookie) {
+			FBWorld.Helpers.makeMeACookie(name, null);
+		}
+	}
+	document.$cookie = {};
+}
+
 // Modified to make it not use jquery
 FBWorld.Helpers.makeMeACookie = function(name, value, options) {
     if (typeof value != 'undefined') { // name and value given, set cookie
@@ -442,11 +466,13 @@ FBWorld.Helpers.makeMeACookie = function(name, value, options) {
         var path = options.path ? '; path=' + (options.path) : '';
         var domain = options.domain ? '; domain=' + (options.domain) : '';
         var secure = options.secure ? '; secure' : '';
-        document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+        var toAssign = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+        document.$cookie[name] = value && toAssign;
+        document.cookie = toAssign;
     } else { // only name given, get cookie
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
+        var cookieValue = null, dcookie = document.cookie || document.$cookie[name];
+        if (dcookie && dcookie != '') {
+            var cookies = dcookie.split(';');
             for (var i = 0; i < cookies.length; i++) {
                 var cookie = FBWorld.Helpers.trim(cookies[i]);
                 // Does this cookie string begin with the name we want?

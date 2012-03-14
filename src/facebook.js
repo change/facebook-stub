@@ -87,6 +87,10 @@
   function setUid(newUid) {
     return FBWorld.state('uid', newUid);
   }
+  
+  function appId() {
+    return FBWorld.state('appId');
+  }
 
   function setExtendedPermissions(newPermissions) {
     return FBWorld.state('perms', 'extended', newPermissions);
@@ -127,6 +131,21 @@
     return JSON.parse(FBWorld.Helpers.makeMeACookie('fb_friends') || '[]');
   }
 
+  function reset() {
+    FBWorld.initialized = false;
+    FBWorld.beingPromptedToLogIn = false;
+    FBWorld.beingPromptedToLogInCallback = undefined;
+    // this will come later, no need for it now
+    // successfullyLogin: successfullyLogin,
+    // failToLogin: failToLogin,
+
+    FBWorld.beingPromptedToConnect = false;
+    FBWorld.beingPromptedToConnectInCallback = undefined;
+
+    if (FBWorld.Helpers) FBWorld.Helpers.resetMyCookies();
+    else document.$cookie = {};
+  }
+  
   var XFBML = {
     parse: function(element, callback) {
       callback();
@@ -151,19 +170,13 @@
     setUid                  : setUid,
     setSecret               : setSecret,
     uid                     : uid,
+    appId                   : appId,
     connected               : connected,
     notConnected            : notConnected,
     setExtendedPermissions  : setExtendedPermissions,
+    
+    reset                   : reset,
 
-    initialized                      : false,
-    beingPromptedToLogIn             : false,
-    beingPromptedToLogInCallback     : undefined,
-    // this will come later, no need for it now
-    // successfullyLogin: successfullyLogin,
-    // failToLogin: failToLogin,
-
-    beingPromptedToConnect           : false,
-    beingPromptedToConnectInCallback : undefined,
     allowConnection                  : allowConnection,
     denyConnection                   : denyConnection,
 
@@ -171,6 +184,8 @@
     addFriend                        : addFriend,
     friendList                       : friendList
   };
+  
+  FBWorld.reset();
 
   // PRIVATE FUNCTIONS
 
@@ -220,8 +235,8 @@
     // simulate being prompted to log in
     FBWorld.beingPromptedToLogIn = true;
     FBWorld.beingPromptedToLogInCallback = function(approved) {
-      FBWorld.beingPromptedToLogin = false;
-      FBWorld.beingPromptedToLoginCallback = undefined;
+      FBWorld.beingPromptedToLogIn = false;
+      FBWorld.beingPromptedToLogInCallback = undefined;
       if(approved) {
         FBWorld.loggedIn();
         if (!FBWorld.state('connected')) {
