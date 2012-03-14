@@ -228,8 +228,8 @@
     // simulate being prompted to log in
     FBWorld.beingPromptedToLogIn = true;
     FBWorld.beingPromptedToLogInCallback = function(approved) {
-      FBWorld.beingPromptedToLogin = false;
-      FBWorld.beingPromptedToLoginCallback = undefined;
+      FBWorld.beingPromptedToLogIn = false;
+      FBWorld.beingPromptedToLogInCallback = undefined;
       if(approved) {
         FBWorld.loggedIn();
         if (!FBWorld.state('connected')) {
