@@ -16,14 +16,20 @@
       console.log('FB.login() called when user is already connected.');
       if (FBWorld.state('connected')) {
         callback(getStatus('standard'));
-        return;
+      }else{
+        promptToConnect(options, callback)
       }
+    }else{
+      promptToLogin(options, callback)
     }
-    // simulate being prompted to login
+  }
+
+  // simulate prompt to login
+  function promptToLogin(options, callback) {
     FBWorld.beingPromptedToLogin = true;
     FBWorld.beingPromptedToLoginOptions = options;
     FBWorld.beingPromptedToLoginCallback = callback;
-  }
+  };
 
 
   // simulates resolving a login prompt in one of three ways
@@ -70,6 +76,7 @@
 
   // connect to app
 
+  // simulate prompt to connect
   function promptToConnect(options, callback) {
     FBWorld.beingPromptedToConnect = true;
     FBWorld.beingPromptedToConnectOptions = options;
