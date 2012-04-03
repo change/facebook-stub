@@ -9,19 +9,109 @@
     state('appId', data.appId);
   }
 
+  // login
   function login(callback, options) {
     if (calledBeforeInit('login')) return;
     if (FBWorld.state('loggedIn')) {
       console.log('FB.login() called when user is already connected.');
       if (FBWorld.state('connected')) {
         callback(getStatus('standard'));
-      } else {
-        simulatePromptToConnect(callback, options);
+        return;
       }
-    } else {
-      simulatePromptToLogin(callback, options);
     }
+    // simulate being prompted to login
+    FBWorld.beingPromptedToLogin = true;
+    FBWorld.beingPromptedToLoginOptions = options;
+    FBWorld.beingPromptedToLoginCallback = callback;
   }
+
+
+  // simulates resolving a login prompt in one of three ways
+  function resolveLoginPrompt(successfull, facebook_uid) {
+    if (!FBWorld.beingPromptedToLogin) throw "you are not being prompted to login";
+    var
+      options  = FBWorld.beingPromptedToLoginOptions,
+      callback = FBWorld.beingPromptedToLoginCallback;
+
+    // reset the FBWorld state
+    FBWorld.beingPromptedToLogin = false;
+    FBWorld.beingPromptedToLoginOptions = undefined;
+    FBWorld.beingPromptedToLoginCallback = undefined;
+
+    if (successfull){
+      FBWorld.setUid(facebook_uid);
+      FBWorld.loggedIn();
+
+      if (!FBWorld.state('connected')) {
+        promptToConnect(options, callback);
+      } else {
+        FBWorld.state('perms', 'standard', options.perms);
+        callback(getStatus('standard'));
+      }
+
+    } else {
+      FBWorld.notLoggedIn();
+      callback(getStatus());
+    }
+  };
+
+  function successfullyLogin(facebook_uid){
+    resolveLoginPrompt(true, facebook_uid);
+  }
+
+  function failToLogin(){
+    resolveLoginPrompt(false);
+  }
+
+  function cancelLogin(){
+    resolveLoginPrompt(false);
+  }
+
+
+  // connect to app
+
+  function promptToConnect(options, callback) {
+    FBWorld.beingPromptedToConnect = true;
+    FBWorld.beingPromptedToConnectOptions = options;
+    FBWorld.beingPromptedToConnectCallback = callback;
+  }
+
+  function resolvePromptToConnect(approved) {
+    if (!FBWorld.beingPromptedToConnect) throw "you are not being prompted to connect";
+    var
+      options  = FBWorld.beingPromptedToConnectOptions,
+      callback = FBWorld.beingPromptedToConnectCallback;
+
+      // reset the FBWorld state
+      FBWorld.beingPromptedToConnect = false;
+      FBWorld.beingPromptedToConnectOptions = undefined;
+      FBWorld.beingPromptedToConnectCallback = undefined;
+
+    if (approved){
+      FBWorld.connected();
+      FBWorld.state('perms', 'standard', options.perms);
+    } else {
+      FBWorld.notConnected();
+    }
+
+    callback(getStatus('standard'));
+  }
+
+  function acceptPromptToConnect() {
+    resolvePromptToConnect(true);
+  };
+
+  function denyPromptToConnect() {
+    resolvePromptToConnect(false);
+  };
+
+  function cancelPromptToConnect() {
+    resolvePromptToConnect(false);
+  };
+
+
+
+
 
   function logout(callback) {
     if (calledBeforeInit('logout')) return;
@@ -127,6 +217,38 @@
     return JSON.parse(FBWorld.Helpers.makeMeACookie('fb_friends') || '[]');
   }
 
+
+  // sharing
+
+  function ui(options, callback) {
+    if (options.method === 'feed'){
+      FBWorld.beingPromptedToShare = true;
+      FBWorld.beingPromptedToShareOptions  = options;
+      FBWorld.beingPromptedToShareCallback = callback;
+    }
+  }
+
+  // simulate closing the share prompt by either sharing or canceling
+  function resolveSharePrompt(way) {
+    response = {};
+    if (way === 'share') response.post_id = Math.floor(Math.random() * 100000);
+    if (way === 'cancel');
+
+    if (typeof FBWorld.beingPromptedToShareCallback === 'function')
+      FBWorld.beingPromptedToShareCallback(response);
+    FBWorld.beingPromptedToShare         = false;
+    FBWorld.beingPromptedToShareOptions  = undefined;
+    FBWorld.beingPromptedToShareCallback = undefined;
+  };
+
+  function confirmSharePrompt(){
+    resolveSharePrompt('share');
+  }
+
+  function cancelSharePrompt(){
+    resolveSharePrompt('cancel');
+  }
+
   var XFBML = {
     parse: function(element, callback) {
       callback();
@@ -141,11 +263,16 @@
     getSession     : getSession,
     api            : api,
     XFBML          : XFBML,
-    getUserID      : getUserID
+    getUserID      : getUserID,
+    ui             : ui
   };
 
   FBWorld = { // used to set the state of Facebook
+
+    // the state of the Facebook World
     state                   : state,
+
+    // Set the state of the Facebook World
     loggedIn                : loggedIn,
     notLoggedIn             : notLoggedIn,
     setUid                  : setUid,
@@ -156,21 +283,42 @@
     setExtendedPermissions  : setExtendedPermissions,
 
     initialized                      : false,
-    beingPromptedToLogIn             : false,
-    beingPromptedToLogInCallback     : undefined,
-    // this will come later, no need for it now
-    // successfullyLogin: successfullyLogin,
-    // failToLogin: failToLogin,
 
+    // Simulate interactions with Facebook
+
+    // login
+    beingPromptedToLogin             : false,
+    beingPromptedToLoginOptions      : undefined,
+    beingPromptedToLoginCallback     : undefined,
+    successfullyLogin                : successfullyLogin,
+    failToLogin                      : failToLogin,
+    cancelLogin                      : cancelLogin,
+
+    // connecting
     beingPromptedToConnect           : false,
-    beingPromptedToConnectInCallback : undefined,
-    allowConnection                  : allowConnection,
-    denyConnection                   : denyConnection,
+    beingPromptedToConnectOptions    : undefined,
+    beingPromptedToConnectCallback   : undefined,
+    acceptPromptToConnect            : acceptPromptToConnect,
+    denyPromptToConnect              : denyPromptToConnect,
+    cancelPromptToConnect            : cancelPromptToConnect,
+
+    //sharing
+    beingPromptedToShare             : false,
+    beingPromptedToShareOptions      : undefined,
+    beingPromptedToShareCallback     : undefined,
+    confirmSharePrompt               : confirmSharePrompt,
+    cancelSharePrompt                : cancelSharePrompt,
 
     //friends
     addFriend                        : addFriend,
     friendList                       : friendList
   };
+
+
+
+
+
+
 
   // PRIVATE FUNCTIONS
 
@@ -215,52 +363,6 @@
     console.log("FB."+meth+" called before FB.init");
     return true;
   }
-
-  function simulatePromptToLogin(callback, options) {
-    // simulate being prompted to log in
-    FBWorld.beingPromptedToLogIn = true;
-    FBWorld.beingPromptedToLogInCallback = function(approved) {
-      FBWorld.beingPromptedToLogin = false;
-      FBWorld.beingPromptedToLoginCallback = undefined;
-      if(approved) {
-        FBWorld.loggedIn();
-        if (!FBWorld.state('connected')) {
-          simulatePromptToConnect(callback, options);
-        } else {
-          FBWorld.state('perms', 'standard', options.perms);
-          callback(getStatus('standard'));
-        }
-      } else {
-        FBWorld.notLoggedIn();
-        callback(getStatus());
-      }
-
-    };
-  };
-
-  function simulatePromptToConnect(callback, options) {
-    // simulate being prompted to connect
-    FBWorld.beingPromptedToConnect = true;
-    FBWorld.beingPromptedToConnectCallback = function(approved) {
-      approved ? FBWorld.connected() : FBWorld.notConnected();
-      FBWorld.beingPromptedToConnect = false;
-      FBWorld.beingPromptedToConnectCallback = undefined;
-      if (approved) {
-        FBWorld.state('perms', 'standard', options.perms);
-      }
-      callback(getStatus('standard'));
-    };
-  };
-
-  function allowConnection() {
-    if (!FBWorld.beingPromptedToConnect) throw "you are not being prompted to connect";
-    FBWorld.beingPromptedToConnectCallback(true);
-  };
-
-  function denyConnection() {
-    if (!FBWorld.beingPromptedToConnect) throw "you are not being prompted to connect";
-    FBWorld.beingPromptedToConnectCallback(false);
-  };
 
   var cookieOptions = { path: '/', domain: window.location.hostname.replace(/^www/, '')};
 
