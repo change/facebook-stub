@@ -9,18 +9,35 @@
     state('appId', data.appId);
   }
 
+  function missingPermissions(desired){
+    var missing = [];
+    var perms = getStatus('standard').perms.split(',');
+    for (i=0; i<desired.length; i++){
+      if (perms.indexOf(desired[i]) == -1) {
+        missing.push(desired[i]);
+      }
+    }
+    return missing;
+  }
+
   // login
   function login(callback, options) {
     if (calledBeforeInit('login')) return;
     if (FBWorld.state('loggedIn')) {
       console.log('FB.login() called when user is already connected.');
       if (FBWorld.state('connected')) {
-        callback(getStatus('standard'));
+        var missing = missingPermissions(options.scope.split(','));
+        if (missing.length === 0){
+          callback(getStatus('standard'));
+        }else{
+          options.missing_perms = missing;
+          promptToAddPermissions(options, callback);
+        }
       }else{
-        promptToConnect(options, callback)
+        promptToConnect(options, callback);
       }
     }else{
-      promptToLogin(options, callback)
+      promptToLogin(options, callback);
     }
   }
 
@@ -29,8 +46,7 @@
     FBWorld.beingPromptedToLogin = true;
     FBWorld.beingPromptedToLoginOptions = options;
     FBWorld.beingPromptedToLoginCallback = callback;
-  };
-
+  }
 
   // simulates resolving a login prompt in one of three ways
   function resolveLoginPrompt(successfull, facebook_uid) {
@@ -59,7 +75,7 @@
       FBWorld.notLoggedIn();
       callback(getStatus());
     }
-  };
+  }
 
   function successfullyLogin(facebook_uid){
     resolveLoginPrompt(true, facebook_uid);
@@ -106,16 +122,59 @@
 
   function acceptPromptToConnect() {
     resolvePromptToConnect(true);
-  };
+  }
 
   function denyPromptToConnect() {
     resolvePromptToConnect(false);
-  };
+  }
 
   function cancelPromptToConnect() {
     resolvePromptToConnect(false);
-  };
+  }
 
+
+
+  function promptToAddPermissions(options, callback){
+    FBWorld.beingPromptedToAddPermissions = true;
+    FBWorld.beingPromptedToAddPermissionsOptions = options;
+    FBWorld.beingPromptedToAddPermissionsCallback = callback;
+  }
+
+  function beingPromptedToAddThesePermissions(permissions){
+    // sort and stringify permissions arrays to make them easier to compare.  maybe not fast, but succinct
+    return FBWorld.beingPromptedToAddPermissions && FBWorld.beingPromptedToAddPermissionsOptions.missing_perms.sort().toString() == permissions.split(',').sort().toString();
+  }
+
+  function resolvePromptToAddPermissions(approved, permissions) {
+    if (!FBWorld.beingPromptedToAddPermissions) throw "you are not being prompted to add permissions";
+    var
+      options  = FBWorld.beingPromptedToAddPermissionsOptions,
+      callback = FBWorld.beingPromptedToAddPermissionsCallback;
+
+      // reset the FBWorld state
+      FBWorld.beingPromptedToAddPermissions = false;
+      FBWorld.beingPromptedToAddPermissionsOptions = undefined;
+      FBWorld.beingPromptedToAddPermissionsCallback = undefined;
+
+    if (approved){
+      FBWorld.state('perms', 'standard', permissions);
+    }
+    callback(getStatus('standard'));
+  }
+
+  function acceptPromptToAddPermissions(add) {
+    var perms = getStatus("standard").perms;
+    var separator = perms.length ? ',' : '';
+    resolvePromptToAddPermissions(true, perms + separator + add);
+  }
+
+  function denyPromptToAddPermissions() {
+    resolvePromptToAddPermissions(false);
+  }
+
+  function cancelPromptToAddPermissions() {
+    resolvePromptToAddPermissions(false);
+  }
 
 
 
@@ -196,6 +255,7 @@
   function loggedIn() {
     createConnectedCookie();
     FBWorld.state('loggedIn', true);
+    FBWorld.state('perms', 'standard', '');
     return true;
   }
 
@@ -308,6 +368,15 @@
     acceptPromptToConnect            : acceptPromptToConnect,
     denyPromptToConnect              : denyPromptToConnect,
     cancelPromptToConnect            : cancelPromptToConnect,
+
+    // adding permissions
+    beingPromptedToAddPermissions         : false,
+    beingPromptedToAddThesePermissions    : beingPromptedToAddThesePermissions,
+    beingPromptedToAddPermissionsOptions  : undefined,
+    beingPromptedToAddPermissionsCallback : undefined,
+    acceptPromptToAddPermissions          : acceptPromptToAddPermissions,
+    denyPromptToAddPermissions            : denyPromptToAddPermissions,
+    cancelPromptToAddPermissions          : cancelPromptToAddPermissions,
 
     //sharing
     beingPromptedToShare             : false,
