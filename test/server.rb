@@ -10,7 +10,7 @@ class TestServer < Sinatra::Base
 
   get '/javascripts/facebook-stub.js' do
     response['Content-Type'] = "application/javascript"
-    File.read ROOT + 'pkg/facebook-stub.js'
+    File.read ROOT + 'bin/facebook-stub.js'
   end
 
   get '/' do
