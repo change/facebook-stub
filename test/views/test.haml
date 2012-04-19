@@ -1,0 +1,20 @@
+!!!
+%html
+  %head
+    %meta{:charset => "utf-8"}
+    %title Facebook Stub Test
+    %script{:src => "/javascripts/facebook-stub.js", :type => "text/javascript"}
+    :javascript
+
+      FBWorld.setSecret('00000000000000000000000000000000');
+
+      FB.init({
+        appId      : '000000000000000',
+        status     : true,                     // check login status
+        cookie     : true,                     // enable cookies to allow the server to access the session
+        xfbml      : false,                    // parse XFBML
+        channelUrl : '/facebook/channel.html',
+        oauth      : true
+      });
+
+  %body

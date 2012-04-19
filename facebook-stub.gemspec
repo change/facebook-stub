@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "facebook-stub/version"
+require "facebook_stub/version"
 
 Gem::Specification.new do |s|
   s.name        = "facebook-stub"
-  s.version     = Facebook::Stub::VERSION
+  s.version     = FacebookStub::VERSION
   s.authors     = ["Change.org"]
   s.email       = ["techops@change.org"]
   s.homepage    = ""
@@ -15,11 +15,19 @@ Gem::Specification.new do |s|
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.executables   = `git ls-files -- pkg/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
   # specify any dependencies here; for example:
   # s.add_development_dependency "rspec"
   # s.add_runtime_dependency "rest-client"
-  s.add_development_dependency "rake"
+  s.add_development_dependency 'debugger'
+  s.add_development_dependency 'sprockets'
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'sinatra'
+  s.add_development_dependency 'shotgun'
+  s.add_development_dependency 'haml'
+  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'capybara'
+
 end

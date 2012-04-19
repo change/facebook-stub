@@ -1,8 +1,0 @@
-#!/bin/sh
-if [ ! -f src/facebook.js ] ; then
-  echo "Please run this from the top level"
-  exit 1
-fi
-
-cat src/facebook.js src/libs/*.js > facebook-stub.js
-git add facebook-stub.js
