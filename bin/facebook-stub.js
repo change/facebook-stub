@@ -273,6 +273,10 @@
     return FBWorld.state('uid', newUid);
   }
 
+  function appId() {
+    return FBWorld.state('appId');
+  }
+
   function setPermissions(newPermissions) {
     return FBWorld.state('perms', 'data', convertPermsToData(newPermissions));
   }
@@ -372,6 +376,7 @@
     loggedIn                : loggedIn,
     notLoggedIn             : notLoggedIn,
     setUid                  : setUid,
+    appId                   : appId,
     setSecret               : setSecret,
     uid                     : uid,
     connected               : connected,
@@ -379,7 +384,7 @@
     setPermissions          : setPermissions,
     getPermissions          : getPermissions,
 
-    initialized                      : false,
+    initialized             : false,
 
     // Simulate interactions with Facebook
 
