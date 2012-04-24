@@ -285,10 +285,10 @@
     return state('secret', newSecret);
   }
 
-  function loggedIn() {
+  function loggedIn(perms) {
     createConnectedCookie();
     FBWorld.state('loggedIn', true);
-    FBWorld.state('perms', 'standard', '');
+    if (perms) setPermissions(perms);
     return true;
   }
 

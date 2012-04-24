@@ -31,7 +31,7 @@ describe "facebook-stub.js" do
   end
 
   def logged_in!
-    js_exec("FBWorld.loggedIn()")
+    js_exec("FBWorld.loggedIn('publish_actions')")
   end
 
   def connected!
