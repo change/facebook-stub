@@ -7,7 +7,7 @@ LIB  = ROOT + 'lib'
 PKG  = ROOT + 'pkg'
 BIN  = ROOT + 'bin'
 
-task :build do
+task :build_js do
   require 'sprockets'
   environment = Sprockets::Environment.new
   environment.append_path LIB.to_s
@@ -20,6 +20,16 @@ RSpec::Core::RakeTask.new do |t|
   t.pattern = ROOT.join("spec/**/*_spec.rb").to_s
 end
 
-task :test => [:build, :spec]
+task :test => [:build_js, :spec, 'jasmine:ci']
 
 task :default => :test
+
+begin
+  require 'jasmine'
+  Rake::Task[:build_js].invoke
+  load 'jasmine/tasks/jasmine.rake'
+rescue LoadError
+  task :jasmine do
+    abort "Jasmine is not available. In order to run jasmine, you must: (sudo) gem install jasmine"
+  end
+end
