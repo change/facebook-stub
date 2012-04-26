@@ -268,13 +268,12 @@
           perms = {data:[theState.perms.data]};
         callback(perms);
         break;
-      case '/me/feed':
-        if (method == 'post') {
-          callback({id: Math.floor(Math.random() * 100000)});
-          break;
-        }
       default:
-        callback(apiFailMessage(path));
+        if(/\/.+\/feed/.test(path) && method == 'post') { // /me/feed or /123/feed
+          callback({id: Math.floor(Math.random() * 100000)});
+        } else {
+          callback(apiFailMessage(path));
+        }
     }
   }
 

@@ -41,6 +41,13 @@ describe("FB.api", function() {
       });
     });
 
+    describe("when I call FB.api('/123/feed', 'post', params, callback)", function() {
+      it("should callback with a random id", function() {
+        FB.api('/123/feed', 'post', {}, function (r) {
+          expect(r.id).toBeDefined();
+        });
+      });
+    });
   });
 
   describe("when not connected", function () {
