@@ -257,23 +257,18 @@
       return;
     }
 
-    switch (path) {
-      case '/me/friends':
-        callback({data:FBWorld.friendList()});
-        break;
-      case '/me/permissions':
-        var theState = FBWorld.state();
-        var perms;
-        if (theState && theState.perms && theState.perms.data)
-          perms = {data:[theState.perms.data]};
-        callback(perms);
-        break;
-      default:
-        if(/\/.+\/feed/.test(path) && method == 'post') { // /me/feed or /123/feed
-          callback({id: Math.floor(Math.random() * 100000)});
-        } else {
-          callback(apiFailMessage(path));
-        }
+    if(/\/me\/friends(\?.*)?/.test(path)) { // /me/friends?limit=100
+      callback({data:FBWorld.friendList()});
+    } else if(/\/me\/permissions(\?.*)?/.test(path)) { // /me/permissions
+      var theState = FBWorld.state();
+      var perms;
+      if (theState && theState.perms && theState.perms.data)
+        perms = {data:[theState.perms.data]};
+      callback(perms);
+    } else if(/\/.+\/feed/.test(path) && method == 'post') { // /me/feed or /123/feed
+      callback({id: Math.floor(Math.random() * 100000)});
+    } else {
+      callback(apiFailMessage(path));
     }
   }
 

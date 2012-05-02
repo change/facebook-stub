@@ -23,9 +23,28 @@ describe("FB.api", function() {
       });
     });
 
+    describe("when I call FB.api('/me/friends?limit=100', callback)", function() {
+      it("should callback with FBWorld.friendList", function() {
+        FB.api('/me/friends?limit=100', function (r) {
+          expect(r.data).toBeDefined();
+          expect(r.data).toEqual(FBWorld.friendList());
+        });
+      });
+    });
+
     describe("when I call FB.api('/me/permissions', callback)", function() {
       it("should callback with FBWorld.state.perms", function() {
         FB.api('/me/permissions', function (r) {
+          expect(r).toBeDefined();
+          expect(r.data).toBeDefined();
+          expect(r.data).toEqual([FBWorld.state().perms.data]);
+        });
+      });
+    });
+
+    describe("when I call FB.api('/me/permissions?foo=bar', callback)", function() {
+      it("should callback with FBWorld.state.perms", function() {
+        FB.api('/me/permissions?foo=bar', function (r) {
           expect(r).toBeDefined();
           expect(r.data).toBeDefined();
           expect(r.data).toEqual([FBWorld.state().perms.data]);
