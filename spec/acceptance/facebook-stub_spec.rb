@@ -18,6 +18,10 @@ describe "facebook-stub.js" do
     js_exec("FB.login(function() {}, #{options.to_json})")
   end
 
+  def logout!
+    js_exec("FB.logout(function() {})")
+  end
+
   def successfully_login!
     js_exec("FBWorld.successfullyLogin()")
   end
@@ -245,6 +249,17 @@ describe "facebook-stub.js" do
             end
 
           end
+        end
+
+        context "when I call FB.logout" do
+          before do
+            logout!
+          end
+
+          it "should make call to FBWorld.hasPermissions('perm1') return false" do
+            has_permissions?('perm1').should be_false
+          end
+
         end
 
       end

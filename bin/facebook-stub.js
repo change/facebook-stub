@@ -205,7 +205,7 @@
   }
 
   function hasPermissions(permissions) {
-    return missingPermissions(permissions).length === 0;
+    return FBWorld.state('loggedIn') && FBWorld.state('connected') && missingPermissions(permissions).length === 0;
   }
 
   function logout(callback) {
