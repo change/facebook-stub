@@ -22,6 +22,18 @@ describe "facebook-stub.js" do
     js_exec("FB.logout(function() {})")
   end
 
+  def get_user_id
+    js_exec("FB.getUserID()")
+  end
+
+  def set_user_id_using_number(uid)
+    js_exec("FBWorld.setUid(#{uid})")
+  end
+
+  def set_user_id_using_string(uid)
+    js_exec("FBWorld.setUid('#{uid}')")
+  end
+
   def successfully_login!
     js_exec("FBWorld.successfullyLogin()")
   end
@@ -312,5 +324,33 @@ describe "facebook-stub.js" do
       end
 
     end
+  end
+
+  describe "#getUserID" do
+    before do
+      visit '/' # to initialize FBWorld
+    end
+
+    context "user ID is set as string" do
+      before do
+        set_user_id_using_string("12345")
+      end
+
+      it "should return a string" do
+        get_user_id.should eql "12345"
+      end
+
+    end
+
+    context "user ID is set as number" do
+      before do
+        set_user_id_using_number(12345)
+      end
+
+      it "should return a string" do
+        get_user_id.should eql "12345"
+      end
+    end
+
   end
 end

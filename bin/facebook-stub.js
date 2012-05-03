@@ -222,7 +222,8 @@
 
   function getUserID() {
     if (calledBeforeInit('getUserID')) return undefined;
-    return uid();
+    var id = uid();
+    return id && id.toString() || undefined; // FB.getUserID returns a string, so make sure we do the same
   }
 
 
