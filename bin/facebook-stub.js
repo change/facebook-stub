@@ -221,7 +221,7 @@
   }
 
   function getUserID() {
-    if (calledBeforeInit('getUserID')) return undefined;
+    if (calledBeforeInit('getUserID') || !FBWorld.state('connected')) return 0; // should not return anything unless connected
     var id = uid();
     return id && id.toString() || undefined; // FB.getUserID returns a string, so make sure we do the same
   }

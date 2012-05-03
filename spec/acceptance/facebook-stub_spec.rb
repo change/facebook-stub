@@ -331,26 +331,40 @@ describe "facebook-stub.js" do
       visit '/' # to initialize FBWorld
     end
 
-    context "user ID is set as string" do
-      before do
+    context "User has not connected" do
+      it "should always return nil" do
         set_user_id_using_string("12345")
-      end
-
-      it "should return a string" do
-        get_user_id.should eql "12345"
-      end
-
-    end
-
-    context "user ID is set as number" do
-      before do
+        get_user_id.should eql 0
         set_user_id_using_number(12345)
-      end
-
-      it "should return a string" do
-        get_user_id.should eql "12345"
+        get_user_id.should eql 0
       end
     end
 
+    context "User has connected" do
+      before do
+        connected!
+      end
+
+      context "user ID is set as string" do
+        before do
+          set_user_id_using_string("12345")
+        end
+
+        it "should return a string" do
+          get_user_id.should eql "12345"
+        end
+
+      end
+
+      context "user ID is set as number" do
+        before do
+          set_user_id_using_number(12345)
+        end
+
+        it "should return a string" do
+          get_user_id.should eql "12345"
+        end
+      end
+    end
   end
 end
