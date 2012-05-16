@@ -269,10 +269,18 @@
         perms = {data:[theState.perms.data]};
       callback(perms);
     } else if(/\/.+\/feed/.test(path) && method == 'post') { // /me/feed or /123/feed
-      callback({id: Math.floor(Math.random() * 100000)});
+      FBWorld.posted({path: path, params: params});
+      callback({id: randomPostId()});
+    } else if(/\/me\/.+:.+/.test(path) && method == 'post') {
+      FBWorld.posted({path: path, params: params});
+      callback({id: randomPostId()});
     } else {
       callback(apiFailMessage(path));
     }
+  }
+
+  function randomPostId() {
+    return Math.floor(Math.random() * 100000);
   }
 
   function apiUnconnectedMessage() {
@@ -426,11 +434,33 @@
     FBWorld.Helpers.makeMeACookie('fb-stub', null);
   }
 
+  function posted(){
+    var p = state('posted') || [];
+    if (arguments.length == 1){
+      p.push(arguments[0]);
+    }
+    state('posted', p);
+    return p;
+  }
+
+  // Give list of params posted on path
+  function lastPostForPath(path) {
+    var results = [];
+    var posted = state('posted') || [];
+    for (var i = posted.length - 1; i >= 0; i--) {
+      var post = posted[i];
+      if (post.path == path)
+        return post.params;
+    }
+    return undefined;
+  }
+
   var XFBML = {
     parse: function(element, callback) {
       callback();
     }
   };
+
 
   FB = { // Emulates the FB API
     getLoginStatus : getLoginStatus,
@@ -501,7 +531,11 @@
 
     //friends
     addFriend                        : addFriend,
-    friendList                       : friendList
+    friendList                       : friendList,
+
+    // posted
+    posted                          : posted,
+    lastPostForPath                 : lastPostForPath
   };
 
 

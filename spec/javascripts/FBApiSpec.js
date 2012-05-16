@@ -66,7 +66,36 @@ describe("FB.api", function() {
           expect(r.id).toBeDefined();
         });
       });
+      it("should push onto FBWorld.published", function() {
+        var path = '/me/feed';
+        var params = {
+          bar: 'baz',
+          foobar: 'foo'
+        };
+        FB.api(path, 'post', params, function (r) {
+          expect(FBWorld.lastPostForPath(path)).toEqual(params);
+        });
+      });
     });
+
+    describe("when I call FB.api('/me/APP_NAMESPACE:ACTION', 'post', params, callback)", function() {
+      it("should callback with a random id", function() {
+        FB.api('/me/foo:bar', 'post', {}, function (r) {
+          expect(r.id).toBeDefined();
+        });
+      });
+      it("should push onto FBWorld.published", function() {
+        var path = '/me/foo:bar';
+        var params = {
+          bar: 'baz',
+          foobar: 'foo'
+        };
+        FB.api(path, 'post', params, function (r) {
+          expect(FBWorld.lastPostForPath(path)).toEqual(params);
+        });
+      });
+    });
+
   });
 
   describe("when not connected", function () {
