@@ -96,6 +96,34 @@ describe("FB.api", function() {
       });
     });
 
+    describe("when I call FB.api('/', 'post', params, callback)", function() {
+      it("should callback with 1 item when passed one item", function() {
+        FB.api('/', 'post', { batch: [{
+            method: "POST",
+            relative_url: "/me/feed",
+            body: "message=test"
+          }]
+        }, function (r) {
+          expect(r.length).toEqual(1);
+        });
+      });
+
+      it("should callback with 2 item when passed two items", function() {
+        FB.api('/', 'post', { batch: [{
+            method: "POST",
+            relative_url: "/me/feed",
+            body: "message=test"
+          },{
+            method: "POST",
+            relative_url: "/123/feed",
+            body: "message=test"
+          }]
+        }, function (r) {
+          expect(r.length).toEqual(2);
+        });
+      });
+    });
+
   });
 
   describe("when not connected", function () {
