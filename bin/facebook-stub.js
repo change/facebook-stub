@@ -277,6 +277,7 @@
     } else if (/\//.test(path) && method == 'post') { // / for batch api updates
       var result = [];
       for(var i=0; i<params.batch.length; i++) {
+        var batchItem = params.batch[i];
         result.push(
           {
             "code":200,
@@ -300,7 +301,7 @@
               "name":"Pragma",
               "value":"no-cache"
             }],
-            "body":"{\n   \"id\": \""+randomPostId()+"\"\n}"
+            "body":"{\n   \"id\": \"" + batchItem.relative_url.match("/(.*)/feed")[1] +'_'+randomPostId()+"\"\n}"
           }
         );
       }
