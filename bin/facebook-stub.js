@@ -411,7 +411,7 @@
 
   function ui(options, callback) {
     if (FBWorld.state('loggedIn')) {
-      if (options.method === 'feed'){
+      if (options.method === 'feed' || options.method === 'stream.share'){
         FBWorld.beingPromptedToShare = true;
         FBWorld.beingPromptedToShareOptions  = options;
         FBWorld.beingPromptedToShareCallback = callback;
