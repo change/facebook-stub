@@ -21,6 +21,17 @@ describe("FB.api", function() {
           expect(r.data).toEqual(FBWorld.friendList());
         });
       });
+
+      describe("when a FBWorld.returnError has been set", function() {
+        beforeEach(function() {
+          FBWorld.forceReturnError('Facebook Error 1');
+        });
+        it("should callback with the forced error message", function() {
+          FB.api('/me/feed', 'post', {}, function (r) {
+            expect(r).toEqual('Facebook Error 1');
+          });
+        });
+      });
     });
 
     describe("when I call FB.api('/me/friends?limit=100', callback)", function() {
@@ -133,8 +144,19 @@ describe("FB.api", function() {
           expect(r.error.type).toBeDefined();
         });
       });
-    });
 
+      describe("when a FBWorld.returnError has been set", function() {
+        beforeEach(function() {
+          FBWorld.forceReturnError('Facebook Error 1');
+        });
+
+        it("should callback with the forced error message", function() {
+          FB.api(null, 'post', {}, function (r) {
+            expect(r).toEqual('Facebook Error 1');
+          });
+        });
+      });
+    });
   });
 
   describe("when not connected", function () {

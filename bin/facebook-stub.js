@@ -60,7 +60,7 @@
     FBWorld.beingPromptedToLogin = true;
     FBWorld.beingPromptedToLoginOptions = options;
     FBWorld.beingPromptedToLoginCallback = callback;
-    FBWorld.beingPromptedToLoginSkipConnection = skipConnection
+    FBWorld.beingPromptedToLoginSkipConnection = skipConnection;
   }
 
   // simulates resolving a login prompt in one of three ways
@@ -234,6 +234,14 @@
     return getStatus().session;
   }
 
+  function forceReturnError(error) {
+    FBWorld.returnError = error;
+  }
+
+  function resetForcedReturnError() {
+    FBWorld.returnError = undefined;
+  }
+
   function api(path, method, params, callback) {
     // Curry arguments to allow multiple forms:
     // api(path, callback)
@@ -255,25 +263,26 @@
       }
     }
 
+    var callbackResult;
     if (!FBWorld.state('connected')) {
       callback(apiUnconnectedMessage());
       return;
     }
 
     if(/\/me\/friends(\?.*)?/.test(path)) { // /me/friends?limit=100
-      callback({data:FBWorld.friendList()});
+      callbackResult = {data:FBWorld.friendList()};
     } else if(/\/me\/permissions(\?.*)?/.test(path)) { // /me/permissions
       var theState = FBWorld.state();
       var perms;
       if (theState && theState.perms && theState.perms.data)
         perms = {data:[theState.perms.data]};
-      callback(perms);
+      callbackResult = perms;
     } else if(/\/.+\/feed/.test(path) && method == 'post') { // /me/feed or /123/feed
       FBWorld.posted({path: path, params: params});
-      callback({id: randomPostId()});
+      callbackResult = {id: randomPostId()};
     } else if(/\/me\/.+:.+/.test(path) && method == 'post') {
       FBWorld.posted({path: path, params: params});
-      callback({id: randomPostId()});
+      callbackResult = {id: randomPostId()};
     } else if (/\//.test(path) && method == 'post') { // / for batch api updates
       var result = [];
       for(var i=0; i<params.batch.length; i++) {
@@ -305,10 +314,11 @@
           }
         );
       }
-      callback(result)
+      callbackResult = result;
     } else {
-      callback(apiFailMessage(path));
+      callbackResult = apiFailMessage(path);
     }
+    callback(FBWorld.returnError || callbackResult);
   }
 
   function randomPostId() {
@@ -461,6 +471,7 @@
     FBWorld.beingPromptedToShare             = false;
     FBWorld.beingPromptedToShareOptions      = undefined;
     FBWorld.beingPromptedToShareCallback     = undefined;
+    FBWorld.resetForcedReturnError();
 
     // reset cookie
     FBWorld.Helpers.makeMeACookie('fb-stub', null);
@@ -567,7 +578,12 @@
 
     // posted
     posted                          : posted,
-    lastPostForPath                 : lastPostForPath
+    lastPostForPath                 : lastPostForPath,
+
+    // error testing
+    returnError                     : undefined,
+    forceReturnError                : forceReturnError,
+    resetForcedReturnError          : resetForcedReturnError
   };
 
 
