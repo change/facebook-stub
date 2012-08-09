@@ -409,7 +409,7 @@
   function addFriend(id, name) {
     var friends = FBWorld.friendList();
     friends.push({id: id, name: name});
-    FBWorld.Helpers.makeMeACookie('fb_friends', JSON.stringify(friends));
+    FBWorld.Helpers.makeMeACookie('fb_friends', JSON.stringify(friends), cookieOptions);
   }
 
   function friendList() {
@@ -474,7 +474,8 @@
     FBWorld.resetForcedReturnError();
 
     // reset cookie
-    FBWorld.Helpers.makeMeACookie('fb-stub', null);
+    FBWorld.Helpers.makeMeACookie('fb-stub', null, cookieOptions);
+    FBWorld.Helpers.makeMeACookie('fb_friends', null, cookieOptions);
   }
 
   function posted(){
@@ -642,7 +643,7 @@
     return data;
   }
 
-  var cookieOptions = { path: '/', domain: window.location.hostname.replace(/^www/, '')};
+  var cookieOptions = { domain: window.location.hostname.replace(/^www/, '')};
 
   // cookie looks like this: (with the quotes): "access_token=theToken&base_domain=local-change.org&expires=0&secret=theSecret&session_key=theSessionKeysig=theSig-Hashed&uid=theUID"
   function createConnectedCookie() {
@@ -767,7 +768,7 @@ FBWorld.Helpers.makeMeACookie = function(name, value, options) {
         // CAUTION: Needed to parenthesize options.path and options.domain
         // in the following expressions, otherwise they evaluate to undefined
         // in the packed version for some reason...
-        var path = options.path ? '; path=' + (options.path) : '';
+        var path = '; path=/';
         var domain = options.domain ? '; domain=' + (options.domain) : '';
         var secure = options.secure ? '; secure' : '';
         document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
