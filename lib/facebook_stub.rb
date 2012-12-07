@@ -46,6 +46,10 @@ module FacebookStub
     @info = {}
   end
 
+  def javascript
+    @javascript ||= File.read File.expand_path('../../bin/facebook-stub.js', __FILE__)
+  end
+
 end
 
 FacebookStub.reset!
