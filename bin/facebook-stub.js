@@ -648,10 +648,10 @@
   // cookie looks like this: (with the quotes): "access_token=theToken&base_domain=local-change.org&expires=0&secret=theSecret&session_key=theSessionKeysig=theSig-Hashed&uid=theUID"
   function createConnectedCookie() {
     var theState = {
-      user_id: state('uid'),
-      code: 'theAccessToken|hashData',
-      // We need to verify the timezone for this value. Traditionally FB uses PST8PDT, but it may be UTC.
-      issued_at: Math.floor(new Date().getTime() / 1000)
+      userID: state('uid'),
+      authToken: 'theAccessToken|hashData',
+      signedRequest: 'ABC123',
+      expiresIn: 2*60*60
     };
 
     if (uid() !== null) {
