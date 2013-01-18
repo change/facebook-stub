@@ -1,4 +1,14 @@
 function setup() {
+  FBWorld.Helpers.setCookieBasedOnName = function(name, value, options) {
+    this.fakeCookie = this.fakeCookie || {};
+    this.fakeCookie[name] = value;
+  };
+
+  FBWorld.Helpers.getCookieBasedOnName = function(name) {
+    this.fakeCookie = this.fakeCookie || {};
+    return this.fakeCookie[name];
+  };
+
   FBWorld.setSecret('00000000000000000000000000000000');
 
   FB.init({
@@ -9,7 +19,6 @@ function setup() {
     channelUrl : '/facebook/channel.html',
     oauth      : true
   });
-
 }
 
 function apiUnconnectedMessage() {

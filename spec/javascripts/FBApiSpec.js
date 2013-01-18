@@ -1,17 +1,15 @@
 describe("FB.api", function() {
-  beforeEach(function() {
-    setup();
-  });
-
-  afterEach(function() {
-    FBWorld.reset();
-  });
 
   describe("when loggedIn, connected, and granted permissions", function() {
 
     beforeEach(function() {
+      setup();
       FBWorld.loggedIn('publish_actions');
       FBWorld.connected();
+    });
+
+    afterEach(function() {
+      FBWorld.reset();
     });
 
     describe("when I call FB.api('/me/friends', callback)", function() {
@@ -160,6 +158,14 @@ describe("FB.api", function() {
   });
 
   describe("when not connected", function () {
+    beforeEach(function() {
+      setup();
+    });
+
+    afterEach(function() {
+      FBWorld.reset();
+    });
+
     it("should callback with the unconnected error object", function() {
       FB.api('/me/friends', function (r) {
         expect(r).toEqual(apiUnconnectedMessage());
