@@ -649,7 +649,7 @@
   function createConnectedCookie() {
     var theState = {
       userID: state('uid'),
-      authToken: 'theAccessToken|hashData',
+      accessToken: 'theAccessToken|hashData',
       signedRequest: 'ABC123',
       expiresIn: 2*60*60
     };
