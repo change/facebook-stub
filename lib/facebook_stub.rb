@@ -1,5 +1,5 @@
 require "facebook_stub/version"
-require 'facebook_stub/rails/action_view_helper'
+require "facebook_stub/engine"
 
 module FacebookStub
 
@@ -45,15 +45,6 @@ module FacebookStub
   def invalid!
     @info = {}
   end
-
-  def javascript
-    @javascript ||= File.read File.expand_path('../../bin/facebook-stub.js', __FILE__)
-  end
-
 end
 
 FacebookStub.reset!
-
-if defined?(ActionView::Base)
-  ActionView::Base.send(:include, FacebookStub::Rails::ActionViewHelper)
-end
